@@ -103,7 +103,7 @@ def main():
     result = app.exec_()
 
     # shutdown
-    backend.node.get_logger().info("joining")
+    backend.node.get_logger().info("waiting for backend to terminate [viewer]")
     ros_thread.join()
     rclpy.shutdown()
     sys.exit(result)
