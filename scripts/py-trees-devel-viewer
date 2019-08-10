@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# Simple script to make sure the developer console is open and
+# the qrc's for the html/js are generated.
+
+###########################
+# Environment
+###########################
+
+PWD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+export QTWEBENGINE_REMOTE_DEBUGGING=12345
+DIR=/tmp/chrome-devel-configuration
+
+###########################
+# Generate Resources
+###########################
+
+cd ${PWD}/../py_trees_ros_viewer && ./gen.bash
+
+###########################
+# Setup
+###########################
+
+if [ ! -d "${DIR}" ]; then
+  mkdir -p ${DIR}
+  rsync -av --delete --exclude=/Singleton* --exclude=/Session* ~/.config/google-chrome/ ${DIR}
+fi
+
+###########################
+# Launch
+###########################
+
+google-chrome ${OPTIONS} --user-data-dir=${DIR} --app=http://127.0.0.1:12345 > /dev/null 2>&1 &
+pid=$!
+
+py-trees-ros-viewer
+
+kill -s 9 $pid > /dev/null 2>&1 || exit 0

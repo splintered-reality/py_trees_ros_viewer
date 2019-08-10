@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>py_trees_ros_viewer</name>
+  <version>0.1.0</version>
+  <description>
+    A Qt-JS application for visualisation of executing/log-replayed behaviour trees in a ROS2 ecosystem.
+  </description>
+
+  <maintainer email="d.stonier@gmail.com">Daniel Stonier</maintainer>
+  <author>Daniel Stonier</author>
+
+  <license>BSD</license>
+
+  <url type="website">https://github.com/splintered-treality/py_trees_ros_viewer</url>
+  <url type="repository">https://github.com/splintered-treality/py_trees_ros_viewer</url>
+  <url type="bugtracker">https://github.com/splintered-treality/py_trees_ros_viewer/issues</url>
+
+  <build_depend>python3-setuptools</build_depend>
+  <build_depend>pyqt5-dev-tools</build_depend>
+  <build_depend>qttools5-dev-tools</build_depend>
+
+  <exec_depend>py_trees_ros_interfaces</exec_depend>
+  <exec_depend>py_trees_ros_js</exec_depend>
+  <exec_depend>python3-qt5-bindings</exec_depend>
+  <exec_depend>python3-pyqt5.qtwebengine</exec_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

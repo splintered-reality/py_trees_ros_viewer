@@ -1,0 +1,72 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>PyTrees Viewer</title>
+</head>
+<script src="js/jointjs/dagre-0.8.4.min.js"></script>
+<script src="js/jointjs/graphlib-2.1.7.min.js"></script>
+<script src="js/jointjs/jquery-3.4.1.min.js"></script>
+<script src="js/jointjs/lodash-4.17.11.min.js"></script>
+<script src="js/jointjs/backbone-1.4.0.js"></script>
+<script src="js/jointjs/joint-3.0.2.min.js"></script>
+<script src="js/py_trees-0.3.1.js"></script>
+<link rel="stylesheet" href="js/py_trees-0.3.1.css">
+<link rel="stylesheet" type="text/css" href="js/jointjs/joint-3.0.2.min.css"/>
+<style>
+  body {
+    margin: 0;
+  }
+</style>
+<body>
+  <script type="text/javascript">
+    py_trees.hello()
+  </script>
+  <div id="window">
+    <div id="canvas"></div>
+    <div id="timeline"></div>
+  </div>
+  <script type="text/javascript">
+    // rendering canvas
+    canvas_graph = new joint.dia.Graph({});
+    canvas_paper = py_trees.canvas.create_paper({graph: canvas_graph})
+
+    // event timeline
+    timeline_graph = py_trees.timeline.create_graph({event_cache_limit: 100});
+    timeline_paper = py_trees.timeline.create_paper({
+        timeline_graph: timeline_graph,
+        canvas_graph: canvas_graph,
+        canvas_paper: canvas_paper,
+    })
+    
+    // react to window resizing events
+    $(window).resize(function() {
+      py_trees.timeline.scale_content_to_fit(timeline_paper)
+    })
+
+    // 
+    already_rendered = false
+    render_tree = function({tree}) {
+      deserialised_tree = JSON.parse(tree)
+
+      // if there is no timeline
+      // py_trees.canvas.update_graph({graph: canvas_graph, tree: deserialised_tree})
+      // py_trees.canvas.layout_graph({graph: canvas_graph})
+
+      // if there is a timeline
+      py_trees.timeline.add_tree_to_cache({
+          timeline_graph: timeline_graph,
+          canvas_graph: canvas_graph,
+          tree: deserialised_tree
+      })
+
+      if (!already_rendered) {
+        py_trees.canvas.scale_content_to_fit(canvas_paper)
+        already_rendered = true
+        return "rendered"
+      } else {
+        return "already rendered"
+      }
+    }
+  </script>
+</body>
+</html>
