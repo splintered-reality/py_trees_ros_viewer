@@ -33,6 +33,6 @@ fi
 google-chrome ${OPTIONS} --user-data-dir=${DIR} --app=http://127.0.0.1:12345 > /dev/null 2>&1 &
 pid=$!
 
-py-trees-ros-viewer
+py-trees-tree-viewer
 
 kill -s 9 $pid > /dev/null 2>&1 || exit 0

@@ -18,15 +18,18 @@ import functools
 import json
 import signal
 import sys
+import threading
 import time
 
 import PyQt5.QtCore as qt_core
 import PyQt5.QtWidgets as qt_widgets
 
-from . import console
-from . import trees
+import rclpy
 
+from . import backend as ros_backend
+from . import console
 from . import main_window
+from . import trees
 
 ##############################################################################
 # Helpers
@@ -61,12 +64,14 @@ def main():
     # logging
     console.log_level = console.LogLevel.DEBUG
 
+    # ros init
+    rclpy.init()
+
     # the players
     app = qt_widgets.QApplication(sys.argv)
     demo_trees = trees.create_demo_tree_list()
-    window = main_window.MainWindow(
-        default_tree=demo_trees[0]
-    )
+    window = main_window.MainWindow(default_tree=demo_trees[0])
+    backend = ros_backend.Backend()
 
     # sig interrupt handling
     #   use a timer to get out of the gui thread and
@@ -89,9 +94,16 @@ def main():
              demo_trees
         )
     )
-    # qt bringup
+    window.request_shutdown.connect(backend.terminate_ros_spinner)
+
+    # qt/ros bringup
+    ros_thread = threading.Thread(target=backend.spin)
+    ros_thread.start()
     window.show()
     result = app.exec_()
 
     # shutdown
+    backend.node.get_logger().info("waiting for backend to terminate [viewer]")
+    ros_thread.join()
+    rclpy.shutdown()
     sys.exit(result)

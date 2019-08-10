@@ -101,7 +101,7 @@ setup(
     # tests_require=['nose', 'pytest', 'flake8', 'yanc', 'nose-htmloutput']
     entry_points={
         'console_scripts': [
-            'py-trees-ros-viewer = py_trees_ros_viewer.viewer:main',
+            'py-trees-tree-viewer = py_trees_ros_viewer.viewer:main',
         ],
     },
 )
