@@ -35,10 +35,7 @@ from . import console
 
 class Backend(qt_core.QObject):
 
-    # led_colour_changed = qt_core.pyqtSignal(str, name="ledColourChanged")
-    # safety_sensors_enabled_changed = qt_core.pyqtSignal(bool, name="safetySensorsEnabledChanged")
-    # battery_percentage_changed = qt_core.pyqtSignal(float, name="batteryPercentageChanged")
-    # battery_charging_status_changed = qt_core.pyqtSignal(float, name="batteryChargingStatusChanged")
+    discovered_topics_changed = qt_core.pyqtSignal(list, name="discoveredTopicsChanged")
 
     def __init__(self):
         super().__init__()
@@ -73,7 +70,8 @@ class Backend(qt_core.QObject):
         new_topic_names.sort()
         if self.discovered_topics != new_topic_names:
             self.discovered_topics = new_topic_names
-            console.logdebug("topic names: {} [backend]".format(self.discovered_topics))
+            self.discovered_topics_changed.emit(self.discovered_topics)
+            console.logdebug("discovered topics changed {}[backend]".format(self.discovered_topics))
         else:
             console.logdebug("nochange")
         self.discovered_timestamp = time.monotonic()

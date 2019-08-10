@@ -1,4 +1,5 @@
 eclipse.preferences.version=1
 encoding//py_trees_ros_viewer/backend.py=utf-8
+encoding//py_trees_ros_viewer/main_window.py=utf-8
 encoding//py_trees_ros_viewer/viewer.py=utf-8
 encoding//py_trees_ros_viewer/web_view.py=utf-8

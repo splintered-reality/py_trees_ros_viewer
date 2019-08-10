@@ -47,6 +47,10 @@ class MainWindow(qt_widgets.QMainWindow):
         )
 
     @qt_core.pyqtSlot()
+    def onDiscoveredTopicsChanged(self):
+        console.logdebug("discovered topics changed callback [main window]")
+
+    @qt_core.pyqtSlot()
     def onLoadFinished(self, default_tree):
         console.logdebug("web page loaded [main window]")
         self.ui.send_button.setEnabled(True)

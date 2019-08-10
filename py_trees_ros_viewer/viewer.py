@@ -94,6 +94,7 @@ def main():
              demo_trees
         )
     )
+    backend.discovered_topics_changed.connect(window.onDiscoveredTopicsChanged)
     window.request_shutdown.connect(backend.terminate_ros_spinner)
 
     # qt/ros bringup
