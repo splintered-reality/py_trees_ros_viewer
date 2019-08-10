@@ -18,6 +18,7 @@ import os
 
 import PyQt5.QtCore as qt_core
 
+import py_trees_ros
 import rclpy
 
 from . import console
@@ -43,13 +44,23 @@ class Backend(qt_core.QObject):
         default_node_name = "tree_viewer_" + str(os.getpid())
         self.node = rclpy.create_node(default_node_name)
         self.shutdown_requested = False
+        self.topic_type_string = 'py_trees_ros_interfaces/msg/BehaviourTree'
 
     def spin(self):
         while rclpy.ok() and not self.shutdown_requested:
-            console.logdebug("stub for discovery [backend]")
+            self.discover_publishers()
             rclpy.spin_once(self.node, timeout_sec=0.1)
         self.node.destroy_node()
 
     def terminate_ros_spinner(self):
         self.node.get_logger().info("shutdown requested [backend]")
         self.shutdown_requested = True
+
+    def discover_publishers(self):
+        topic_names = py_trees_ros.utilities.find_topic(
+            node=self.node,
+            topic_type=self.topic_type_string,
+            namespace=None,
+            timeout=0.1  # seconds
+        )
+        console.logdebug("topic names: {} [backend]", topic_names)
