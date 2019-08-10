@@ -57,10 +57,10 @@ class Backend(qt_core.QObject):
         self.shutdown_requested = True
 
     def discover_publishers(self):
-        topic_names = py_trees_ros.utilities.find_topic(
+        topic_names = py_trees_ros.utilities.find_topics(
             node=self.node,
             topic_type=self.topic_type_string,
             namespace=None,
             timeout=0.1  # seconds
         )
-        console.logdebug("topic names: {} [backend]", topic_names)
+        console.logdebug("topic names: {} [backend]".format(topic_names))
