@@ -94,6 +94,12 @@ def main():
              demo_trees
         )
     )
+    backend.discovered_topics_changed.connect(window.onDiscoveredTopicsChanged)
+    # two signals for the combo box are relevant
+    #   activated - only when there is a user interaction
+    #   currentTextChanged - when there is a programmatic OR user interaction
+    # window.ui.topic_combo_box.activated.connect(backend.connect)
+    window.ui.topic_combo_box.currentTextChanged.connect(backend.connect)
     window.request_shutdown.connect(backend.terminate_ros_spinner)
 
     # qt/ros bringup
