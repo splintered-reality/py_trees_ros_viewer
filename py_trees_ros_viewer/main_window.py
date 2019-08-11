@@ -15,9 +15,7 @@ Launch a qt dashboard for the tutorials.
 # Imports
 ##############################################################################
 
-import functools
 import json
-import time
 
 import PyQt5.QtCore as qt_core
 import PyQt5.QtWidgets as qt_widgets
@@ -35,21 +33,35 @@ class MainWindow(qt_widgets.QMainWindow):
     request_shutdown = qt_core.pyqtSignal(name="requestShutdown")
     topic_selected_automagically = qt_core.pyqtSignal(str, name="topicSelectedAutomagically")
 
-    def __init__(self, default_tree):
+    def __init__(self):
         super().__init__()
         self.ui = main_window_ui.Ui_MainWindow()
         self.ui.setupUi(self)
         self.readSettings()
-        self.ui.web_view_group_box.ui.web_engine_view.loadFinished.connect(
-            functools.partial(
-                self.onLoadFinished,
-                default_tree
-            )
+        self.ui.web_view_group_box.ui.web_engine_view.loadFinished.connect(self.onLoadFinished)
+        self.web_app_loaded = False
+
+    @qt_core.pyqtSlot(dict)
+    def on_tree_snapshot_arrived(self, tree):
+        if not self.web_app_loaded:
+            return
+
+        web_view_page = self.ui.web_view_group_box.ui.web_engine_view.page()
+        console.logdebug("calling js/render_tree [window]")
+        web_view_page.runJavaScript(
+            "render_tree({tree: '%s'});" % json.dumps(tree),
+            self.on_tree_rendered
         )
 
+    def on_tree_rendered(self, response):
+        """
+        Callback triggered on a response being received from the js render_tree method.
+        """
+        console.logdebug("response from js/render_tree ['{}'][window]".format(response))
+
     @qt_core.pyqtSlot(list)
-    def onDiscoveredTopicsChanged(self, discovered_topics):
-        console.logdebug("discovered topics changed callback {}[main window]".format(discovered_topics))
+    def on_discovered_topics_changed(self, discovered_topics):
+        console.logdebug("discovered topics changed callback {}[window]".format(discovered_topics))
 
         discovered_topics.sort()
 
@@ -80,27 +92,19 @@ class MainWindow(qt_widgets.QMainWindow):
             # self.topic_selected_automagically.emit(discovered_topics[0])
 
     @qt_core.pyqtSlot()
-    def onLoadFinished(self, default_tree):
-        console.logdebug("web page loaded [main window]")
+    def onLoadFinished(self):
+        console.logdebug("web page loaded [window]")
+        self.web_app_loaded = True
         self.ui.send_button.setEnabled(True)
 
-        def handle_response(reply):
-            console.logdebug("reply: '{}' [viewer]".format(reply))
-
-        default_tree['timestamp'] = time.time()
-        self.ui.web_view_group_box.ui.web_engine_view.page().runJavaScript(
-            "render_tree({tree: '%s'});" % json.dumps(default_tree),
-            handle_response
-        )
-
     def closeEvent(self, event):
-        console.logdebug("received close event [main_window]")
+        console.logdebug("received close event [window]")
         self.request_shutdown.emit()
         self.writeSettings()
         super().closeEvent(event)
 
     def readSettings(self):
-        console.logdebug("read settings [main_window]")
+        console.logdebug("read settings [window]")
         settings = qt_core.QSettings("Splintered Reality", "PyTrees Viewer")
         geometry = settings.value("geometry")
         if geometry is not None:
@@ -110,7 +114,7 @@ class MainWindow(qt_widgets.QMainWindow):
             self.restoreState(window_state)
 
     def writeSettings(self):
-        console.logdebug("write settings [main_window]")
+        console.logdebug("write settings [window]")
         settings = qt_core.QSettings("Splintered Reality", "PyTrees Viewer")
         settings.setValue("geometry", self.saveGeometry())
         settings.setValue("window_state", self.saveState())  # full size, maximised, minimised, no state
