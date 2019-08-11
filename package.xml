@@ -20,12 +20,12 @@
   <build_depend>pyqt5-dev-tools</build_depend>
   <build_depend>qttools5-dev-tools</build_depend>
 
-  <exec_depend>py_trees_ros</exec_depend>
   <exec_depend>py_trees_ros_interfaces</exec_depend>
   <exec_depend>py_trees_ros_js</exec_depend>
   <exec_depend>python3-qt5-bindings</exec_depend>
   <exec_depend>python3-pyqt5.qtwebengine</exec_depend>
   <exec_depend>rclpy</exec_depend>
+  <exec_depend>unique_identifier_msgs</exec_depend>
 
   <export>
     <build_type>ament_python</build_type>

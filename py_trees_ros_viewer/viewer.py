@@ -24,12 +24,12 @@ import time
 import PyQt5.QtCore as qt_core
 import PyQt5.QtWidgets as qt_widgets
 
+import py_trees_js
 import rclpy
 
 from . import backend as ros_backend
 from . import console
 from . import main_window
-from . import trees
 
 ##############################################################################
 # Helpers
@@ -69,8 +69,8 @@ def main():
 
     # the players
     app = qt_widgets.QApplication(sys.argv)
-    demo_trees = trees.create_demo_tree_list()
-    window = main_window.MainWindow(default_tree=demo_trees[0])
+    demo_trees = py_trees_js.viewer.trees.create_demo_tree_list()
+    window = main_window.MainWindow()
     backend = ros_backend.Backend()
 
     # sig interrupt handling
@@ -94,7 +94,8 @@ def main():
              demo_trees
         )
     )
-    backend.discovered_topics_changed.connect(window.onDiscoveredTopicsChanged)
+    backend.discovered_topics_changed.connect(window.on_discovered_topics_changed)
+    backend.tree_snapshot_arrived.connect(window.on_tree_snapshot_arrived)
     # two signals for the combo box are relevant
     #   activated - only when there is a user interaction
     #   currentTextChanged - when there is a programmatic OR user interaction

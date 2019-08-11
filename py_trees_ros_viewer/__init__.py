@@ -16,7 +16,8 @@ ROS2 ecosystem.
 
 # Pythonic helper modules
 from . import console
-from . import trees
+from . import conversions
+from . import utilities
 
 # Qt widgets
 from . import main_window

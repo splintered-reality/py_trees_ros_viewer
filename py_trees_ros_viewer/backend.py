@@ -19,11 +19,12 @@ import time
 
 import PyQt5.QtCore as qt_core
 
-import py_trees_ros
 import py_trees_ros_interfaces.msg as py_trees_msgs
 import rclpy
 
 from . import console
+from . import conversions
+from . import utilities
 
 ##############################################################################
 # Helpers
@@ -37,6 +38,7 @@ from . import console
 class Backend(qt_core.QObject):
 
     discovered_topics_changed = qt_core.pyqtSignal(list, name="discoveredTopicsChanged")
+    tree_snapshot_arrived = qt_core.pyqtSignal(dict, name="treeSnapshotArrived")
 
     def __init__(self):
         super().__init__()
@@ -64,7 +66,7 @@ class Backend(qt_core.QObject):
         timeout = self.discovered_timestamp + self.discovery_loop_time_sec
         if self.discovered_topics and (time.monotonic() < timeout):
             return
-        new_topic_names = py_trees_ros.utilities.find_topics(
+        new_topic_names = utilities.find_topics(
             node=self.node,
             topic_type=self.topic_type_string,
             namespace=None,
@@ -75,8 +77,6 @@ class Backend(qt_core.QObject):
             self.discovered_topics = new_topic_names
             self.discovered_topics_changed.emit(self.discovered_topics)
             console.logdebug("discovered topics changed {}[backend]".format(self.discovered_topics))
-        else:
-            console.logdebug("nochange")
         self.discovered_timestamp = time.monotonic()
 
     def connect(self, topic_name: str):
@@ -94,7 +94,7 @@ class Backend(qt_core.QObject):
             msg_type=self.topic_type,
             topic=topic_name,
             callback=self.tree_snapshot_handler,
-            qos_profile=py_trees_ros.utilities.qos_profile_latched_topic()
+            qos_profile=utilities.qos_profile_latched_topic()
         )
 
     def tree_snapshot_handler(self, msg: py_trees_msgs.BehaviourTree):
@@ -105,3 +105,31 @@ class Backend(qt_core.QObject):
             msg: incoming serialised tree snapshot
         """
         console.logdebug("handling incoming tree snapshot [backend]")
+        colours = {
+            'Sequence': '#FFA500',
+            'Selector': '#00FFFF',
+            'Parallel': '#FFFF00',
+            'Behaviour': '#DDDDDD',
+            'Decorator': '#555555',
+        }
+        tree = {
+            'timestamp': msg.statistics.stamp.sec + float(msg.statistics.stamp.nanosec) / 1.0e9,
+            'behaviours': {},
+            'visited_path': []}
+        for behaviour in msg.behaviours:
+            behaviour_id = str(conversions.msg_to_uuid4(behaviour.own_id))
+            behaviour_type = conversions.msg_constant_to_behaviour_str(behaviour.type)
+            if behaviour.is_active:
+                tree['visited_path'].append(behaviour_id)
+            tree['behaviours'][behaviour_id] = {
+                'id': behaviour_id,
+                'status': conversions.msg_constant_to_status_str(behaviour.status),
+                'name': behaviour.name,
+                'colour': colours[behaviour_type],
+                'children': [str(conversions.msg_to_uuid4(child_id)) for child_id in behaviour.child_ids],
+                'data': {
+                    'Class': behaviour.class_name,
+                    'Feedback': behaviour.message,
+                },
+            }
+        self.tree_snapshot_arrived.emit(tree)
