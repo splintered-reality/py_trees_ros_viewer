@@ -45,13 +45,10 @@ class MainWindow(qt_widgets.QMainWindow):
     def on_tree_snapshot_arrived(self, tree):
         if not self.web_app_loaded:
             return
-
         web_view_page = self.ui.web_view_group_box.ui.web_engine_view.page()
-        console.logdebug("calling js/render_tree [window]")
-        web_view_page.runJavaScript(
-            "render_tree({tree: '%s'});" % json.dumps(tree),
-            self.on_tree_rendered
-        )
+
+        javascript_command = "render_tree({{tree: {}}})".format(tree)
+        web_view_page.runJavaScript(javascript_command, self.on_tree_rendered)
 
     def on_tree_rendered(self, response):
         """

@@ -45,18 +45,19 @@
 
     // 
     already_rendered = false
+
     render_tree = function({tree}) {
-      deserialised_tree = JSON.parse(tree)
+      console.log("got something", tree)
 
       // if there is no timeline
-      // py_trees.canvas.update_graph({graph: canvas_graph, tree: deserialised_tree})
+      // py_trees.canvas.update_graph({graph: canvas_graph, tree: tree})
       // py_trees.canvas.layout_graph({graph: canvas_graph})
 
       // if there is a timeline
       py_trees.timeline.add_tree_to_cache({
           timeline_graph: timeline_graph,
           canvas_graph: canvas_graph,
-          tree: deserialised_tree
+          tree: tree
       })
 
       if (!already_rendered) {

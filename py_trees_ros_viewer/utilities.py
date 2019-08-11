@@ -18,6 +18,7 @@ import time
 import typing
 
 import rclpy.node
+import rclpy.qos
 
 ##############################################################################
 # Methods
@@ -70,7 +71,7 @@ def find_topics(
     return topic_names
 
 
-def qos_profile_latched_topic():
+def qos_profile_latched_topic() -> rclpy.qos.QoSProfile:
     """
     Convenience retrieval for a latched topic (publisher / subscriber)
     """
@@ -80,3 +81,14 @@ def qos_profile_latched_topic():
         durability=rclpy.qos.QoSDurabilityPolicy.RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL,
         reliability=rclpy.qos.QoSReliabilityPolicy.RMW_QOS_POLICY_RELIABILITY_RELIABLE
     )
+
+
+def normalise_name_strings(name) -> str:
+    """
+    To prepare them for a json dump, they need to have newlines and
+    superflous apostrophe's removed.
+
+    Args:
+        name: name to normalise
+    """
+    return name.replace('\n', ' ')

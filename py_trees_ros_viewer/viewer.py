@@ -47,10 +47,8 @@ def send_tree(web_view_page, demo_trees, unused_checked):
     console.logdebug("send: tree '{}' [{}][viewer]".format(
         send_tree.index, demo_trees[send_tree.index]['timestamp'])
     )
-    web_view_page.runJavaScript(
-        "render_tree({tree: '%s'});" % json.dumps(demo_trees[send_tree.index]),
-        send_tree_response
-    )
+    javascript_command = "render_tree({{tree: {}}})".format(demo_trees[send_tree.index])
+    web_view_page.runJavaScript(javascript_command, send_tree_response)
 
 
 send_tree.index = 0

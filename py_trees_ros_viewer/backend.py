@@ -124,7 +124,7 @@ class Backend(qt_core.QObject):
             tree['behaviours'][behaviour_id] = {
                 'id': behaviour_id,
                 'status': conversions.msg_constant_to_status_str(behaviour.status),
-                'name': behaviour.name,
+                'name': utilities.normalise_name_strings(behaviour.name),
                 'colour': colours[behaviour_type],
                 'children': [str(conversions.msg_to_uuid4(child_id)) for child_id in behaviour.child_ids],
                 'data': {
