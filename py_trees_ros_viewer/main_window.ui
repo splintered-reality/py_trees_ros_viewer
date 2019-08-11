@@ -47,15 +47,43 @@
     <number>1</number>
    </attribute>
    <widget class="QWidget" name="dock_widget_contents">
-    <layout class="QVBoxLayout" name="dock_vertical_layout">
+    <layout class="QVBoxLayout" name="verticalLayout_3">
      <item>
-      <widget class="QPushButton" name="send_button">
-       <property name="enabled">
-        <bool>false</bool>
+      <widget class="QGroupBox" name="testing_group_box">
+       <property name="title">
+        <string>Testing</string>
        </property>
-       <property name="text">
-        <string>Send Tree</string>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QPushButton" name="send_button">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Send Tree</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="topic_selector_group_box">
+       <property name="title">
+        <string>Topic Selector</string>
        </property>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QComboBox" name="topic_combo_box">
+          <property name="insertPolicy">
+           <enum>QComboBox::InsertAlphabetically</enum>
+          </property>
+          <property name="sizeAdjustPolicy">
+           <enum>QComboBox::AdjustToContents</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </item>
      <item>

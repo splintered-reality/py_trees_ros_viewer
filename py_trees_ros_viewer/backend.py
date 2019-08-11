@@ -20,6 +20,7 @@ import time
 import PyQt5.QtCore as qt_core
 
 import py_trees_ros
+import py_trees_ros_interfaces.msg as py_trees_msgs
 import rclpy
 
 from . import console
@@ -42,10 +43,12 @@ class Backend(qt_core.QObject):
         default_node_name = "tree_viewer_" + str(os.getpid())
         self.node = rclpy.create_node(default_node_name)
         self.shutdown_requested = False
+        self.topic_type = py_trees_msgs.BehaviourTree
         self.topic_type_string = 'py_trees_ros_interfaces/msg/BehaviourTree'
         self.discovered_topics = []
         self.discovered_timestamp = time.monotonic()
         self.discovery_loop_time_sec = 3.0
+        self.subscription = None
 
     def spin(self):
         while rclpy.ok() and not self.shutdown_requested:
@@ -75,3 +78,30 @@ class Backend(qt_core.QObject):
         else:
             console.logdebug("nochange")
         self.discovered_timestamp = time.monotonic()
+
+    def connect(self, topic_name: str):
+        """
+        Cancel any current subscriptions and create a new subscription to the specified topic.
+
+        Args:
+            topic_name: fully qualified name of topic to subscribe to
+        """
+        if self.subscription:
+            console.logdebug("cancelling existing subscription [{}][backend]".format(self.subscription))
+            self.node.destroy_subscription(self.subscription)
+        console.logdebug("creating a new subscription [{}][backend]".format(topic_name))
+        self.subscription = self.node.create_subscription(
+            msg_type=self.topic_type,
+            topic=topic_name,
+            callback=self.tree_snapshot_handler,
+            qos_profile=py_trees_ros.utilities.qos_profile_latched_topic()
+        )
+
+    def tree_snapshot_handler(self, msg: py_trees_msgs.BehaviourTree):
+        """
+        Callback to receive incoming tree snapshots before relaying them to the web application.
+
+        Args:
+            msg: incoming serialised tree snapshot
+        """
+        console.logdebug("handling incoming tree snapshot [backend]")
