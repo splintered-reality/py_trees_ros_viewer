@@ -52,16 +52,6 @@
         </widget>
        </item>
        <item>
-        <widget class="QCheckBox" name="scale_to_fit_check_box">
-         <property name="text">
-          <string>Scale to Fit</string>
-         </property>
-         <property name="checked">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
         <spacer name="horizontalSpacer">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>

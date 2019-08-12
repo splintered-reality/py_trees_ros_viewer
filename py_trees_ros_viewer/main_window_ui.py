@@ -38,10 +38,6 @@ class Ui_MainWindow(object):
         self.topic_combo_box.setSizeAdjustPolicy(QtWidgets.QComboBox.AdjustToContents)
         self.topic_combo_box.setObjectName("topic_combo_box")
         self.horizontalLayout.addWidget(self.topic_combo_box)
-        self.scale_to_fit_check_box = QtWidgets.QCheckBox(self.tools_frame)
-        self.scale_to_fit_check_box.setChecked(True)
-        self.scale_to_fit_check_box.setObjectName("scale_to_fit_check_box")
-        self.horizontalLayout.addWidget(self.scale_to_fit_check_box)
         spacerItem = QtWidgets.QSpacerItem(186, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
         self.send_button = QtWidgets.QPushButton(self.tools_frame)
@@ -75,7 +71,6 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "PyTrees Viewer"))
         self.label.setText(_translate("MainWindow", "Topic"))
-        self.scale_to_fit_check_box.setText(_translate("MainWindow", "Scale to Fit"))
         self.send_button.setText(_translate("MainWindow", "Send Demo Tree"))
 
 from py_trees_ros_viewer.web_view import WebViewGroupBox

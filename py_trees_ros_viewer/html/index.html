@@ -27,7 +27,7 @@
   </div>
   <script type="text/javascript">
     // rendering canvas
-    canvas_graph = new joint.dia.Graph({});
+    canvas_graph = py_trees.canvas.create_graph()
     canvas_paper = py_trees.canvas.create_paper({graph: canvas_graph})
 
     // event timeline
@@ -43,30 +43,17 @@
       py_trees.timeline.scale_content_to_fit(timeline_paper)
     })
 
-    // 
-    already_rendered = false
-
     render_tree = function({tree}) {
       console.log("got something", tree)
-
-      // if there is no timeline
-      // py_trees.canvas.update_graph({graph: canvas_graph, tree: tree})
-      // py_trees.canvas.layout_graph({graph: canvas_graph})
 
       // if there is a timeline
       py_trees.timeline.add_tree_to_cache({
           timeline_graph: timeline_graph,
           canvas_graph: canvas_graph,
+          canvas_paper: canvas_paper,
           tree: tree
       })
-
-      if (!already_rendered) {
-        py_trees.canvas.scale_content_to_fit(canvas_paper)
-        already_rendered = true
-        return "rendered (first time)"
-      } else {
-        return "rendered"
-      }
+      return "rendered"
     }
   </script>
 </body>
