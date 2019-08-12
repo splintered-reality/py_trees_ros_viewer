@@ -40,15 +40,16 @@ class MainWindow(qt_widgets.QMainWindow):
         self.readSettings()
         self.ui.web_view_group_box.ui.web_engine_view.loadFinished.connect(self.onLoadFinished)
         self.web_app_loaded = False
+        self.pre_loaded_tree = None
 
     @qt_core.pyqtSlot(dict)
     def on_tree_snapshot_arrived(self, tree):
-        if not self.web_app_loaded:
-            return
-        web_view_page = self.ui.web_view_group_box.ui.web_engine_view.page()
-
-        javascript_command = "render_tree({{tree: {}}})".format(tree)
-        web_view_page.runJavaScript(javascript_command, self.on_tree_rendered)
+        if self.web_app_loaded:
+            javascript_command = "render_tree({{tree: {}}})".format(tree)
+            web_view_page = self.ui.web_view_group_box.ui.web_engine_view.page()
+            web_view_page.runJavaScript(javascript_command, self.on_tree_rendered)
+        else:
+            self.pre_loaded_tree = tree
 
     def on_tree_rendered(self, response):
         """
@@ -93,6 +94,10 @@ class MainWindow(qt_widgets.QMainWindow):
         console.logdebug("web page loaded [window]")
         self.web_app_loaded = True
         self.ui.send_button.setEnabled(True)
+        if self.pre_loaded_tree:
+            javascript_command = "render_tree({{tree: {}}})".format(self.pre_loaded_tree)
+            web_view_page = self.ui.web_view_group_box.ui.web_engine_view.page()
+            web_view_page.runJavaScript(javascript_command, self.on_tree_rendered)
 
     def closeEvent(self, event):
         console.logdebug("received close event [window]")
