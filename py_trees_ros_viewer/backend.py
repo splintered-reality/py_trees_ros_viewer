@@ -109,8 +109,8 @@ class Backend(qt_core.QObject):
             'Sequence': '#FFA500',
             'Selector': '#00FFFF',
             'Parallel': '#FFFF00',
-            'Behaviour': '#DDDDDD',
-            'Decorator': '#555555',
+            'Behaviour': '#555555',
+            'Decorator': '#DDDDDD',
         }
         tree = {
             'timestamp': msg.statistics.stamp.sec + float(msg.statistics.stamp.nanosec) / 1.0e9,
