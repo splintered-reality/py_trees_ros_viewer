@@ -6,6 +6,10 @@ Forthcoming
 -----------
 * ...
 
+0.1.2 (2019-08-14)
+------------------
+* [backend] bugfix dependency on py_trees_js, not py_trees_ros_js
+
 0.1.1 (2019-08-13)
 ------------------
 * [backend] bugfix colour mixup between decorators and behaviours
