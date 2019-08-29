@@ -41,7 +41,8 @@
 
     // react to window resizing events
     $(window).resize(function() {
-      py_trees.timeline.scale_content_to_fit(timeline_paper)
+      py_trees.canvas.on_window_resize(canvas_paper)
+      py_trees.timeline.on_window_resize(timeline_paper)
     })
 
     render_tree = function({tree}) {
