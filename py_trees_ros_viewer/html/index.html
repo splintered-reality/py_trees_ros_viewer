@@ -15,6 +15,7 @@
 <style>
   body {
     margin: 0;
+    overflow:hidden;
   }
 </style>
 <body>
@@ -37,7 +38,7 @@
         canvas_graph: canvas_graph,
         canvas_paper: canvas_paper,
     })
-    
+
     // react to window resizing events
     $(window).resize(function() {
       py_trees.timeline.scale_content_to_fit(timeline_paper)
