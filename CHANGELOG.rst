@@ -4,7 +4,7 @@ Changelog
 
 Forthcoming
 -----------
-* ...
+* [html] disable scrollbars, `#110 <https://github.com/splintered-reality/py_trees_js/pull/110>`_
 
 0.1.2 (2019-08-14)
 ------------------
