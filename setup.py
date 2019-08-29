@@ -71,7 +71,7 @@ setup(
     #   py_trees-<version>.js (and version variable therein)
     #   py_trees-<version.css
     #   index.html.
-    version='0.1.2',  # also package.xml
+    version='0.1.3',  # also package.xml
     packages=find_packages(exclude=['tests*', 'docs*']),
     data_files=[('share/' + package_name, ['package.xml'])],
     # scripts=['scripts/py-trees-devel-viewer'], not working, but not critical
