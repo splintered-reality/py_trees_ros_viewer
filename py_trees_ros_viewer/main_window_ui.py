@@ -11,7 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(551, 356)
+        MainWindow.resize(799, 356)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/images/tuxrobot.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         MainWindow.setWindowIcon(icon)
@@ -40,6 +40,10 @@ class Ui_MainWindow(object):
         self.horizontalLayout.addWidget(self.topic_combo_box)
         spacerItem = QtWidgets.QSpacerItem(186, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
+        self.screenshot_button = QtWidgets.QPushButton(self.tools_frame)
+        self.screenshot_button.setEnabled(False)
+        self.screenshot_button.setObjectName("screenshot_button")
+        self.horizontalLayout.addWidget(self.screenshot_button)
         self.send_button = QtWidgets.QPushButton(self.tools_frame)
         self.send_button.setEnabled(False)
         self.send_button.setObjectName("send_button")
@@ -56,7 +60,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_4.addWidget(self.web_view_group_box)
         MainWindow.setCentralWidget(self.central_display)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 551, 29))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 799, 35))
         self.menubar.setDefaultUp(False)
         self.menubar.setObjectName("menubar")
         MainWindow.setMenuBar(self.menubar)
@@ -71,6 +75,7 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "PyTrees Viewer"))
         self.label.setText(_translate("MainWindow", "Topic"))
+        self.screenshot_button.setText(_translate("MainWindow", "Screenshot"))
         self.send_button.setText(_translate("MainWindow", "Send Demo Tree"))
 
 from py_trees_ros_viewer.web_view import WebViewGroupBox
