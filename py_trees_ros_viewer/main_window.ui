@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>551</width>
+    <width>799</width>
     <height>356</height>
    </rect>
   </property>
@@ -65,6 +65,16 @@
         </spacer>
        </item>
        <item>
+        <widget class="QPushButton" name="screenshot_button">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Screenshot</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="send_button">
          <property name="enabled">
           <bool>false</bool>
@@ -97,8 +107,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>551</width>
-     <height>29</height>
+     <width>799</width>
+     <height>35</height>
     </rect>
    </property>
    <property name="defaultUp">

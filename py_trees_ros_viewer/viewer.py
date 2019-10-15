@@ -14,8 +14,9 @@ A qt-javascript application for viewing executing or replaying py_trees
 # Imports
 ##############################################################################
 
+import datetime
 import functools
-import json
+import os
 import signal
 import sys
 import threading
@@ -52,6 +53,51 @@ def send_tree(web_view_page, demo_trees, unused_checked):
 
 
 send_tree.index = 0
+
+
+@qt_core.pyqtSlot()
+def capture_screenshot(parent, web_engine_view, unused_checked):
+    console.logdebug("captured screenshot [viewer]")
+    file_dialog = qt_widgets.QFileDialog(parent)
+    file_dialog.setNameFilters([
+        "BMP Files (*.bmp)",
+        "JPEG Files (*.jpeg)",
+        "PNG Files (*.png)"
+        ]
+    )
+    file_dialog.selectNameFilter("PNG Files (*.png)")
+    file_dialog.setDefaultSuffix((".png"))
+    file_dialog.setAcceptMode(qt_widgets.QFileDialog.AcceptSave)
+    # unfortunately creates a fair amount of spam on stdout
+    #   'kf5.kio.core: Invalid URL: QUrl("screenshot.jpeg")'
+    #   'kf5.kio.core: Invalid URL: QUrl("screenshot.png")'
+    # but...it ain't broke
+    file_dialog.selectFile("screenshot_{}.png".format(datetime.datetime.now().strftime("%S%M%H%d%m%y")))
+    unused_result = file_dialog.exec()
+    # should be able to restrict it to one file?
+    for filename in file_dialog.selectedFiles():
+        console.logdebug("capturing screenshot: {}".format(filename))
+    # This would be simpler, but you can't specify a default filename, nor suffix on linux...
+#     filename, _ = qt_widgets.QFileDialog.getSaveFileName(
+#         parent=parent,
+#         caption="Export to Png",
+#         directory="screenshot_{}.png".format(datetime.datetime.now().strftime("%S%M%H%d%m%y")),
+#         filter="BMP Files (*.bmp);;JPEG Files (*.jpeg);;PNG Files (*.png)",  # for multiple options, use ;;, e.g. 'All Files (*);;BMP Files (*.bmp);;JPEG Files (*.jpeg);;PNG Files (*.png)'
+#         initialFilter="PNG Files (*.png)",
+#         options=options
+#     )
+#     if filename:
+#         console.loginfo("capturing screenshot: {}".format(filename))
+        extension = os.path.splitext(filename)[-1].upper()
+        if filename.endswith(".png"):
+            extension = b'PNG'
+        elif filename.endswith(".bmp"):
+            extension = b'BMP'
+        elif filename.endswith(".jpeg"):
+            extension = b'JPEG'
+        else:
+            extension = b'PNG'
+        web_engine_view.grab().save(filename, extension)
 
 ##############################################################################
 # Main
@@ -90,6 +136,13 @@ def main():
              send_tree,
              window.ui.web_view_group_box.ui.web_engine_view.page(),
              demo_trees
+        )
+    )
+    window.ui.screenshot_button.clicked.connect(
+        functools.partial(
+            capture_screenshot,
+            window,
+            window.ui.web_view_group_box.ui.web_engine_view,
         )
     )
     backend.discovered_topics_changed.connect(window.on_discovered_topics_changed)

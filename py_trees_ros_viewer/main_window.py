@@ -94,6 +94,7 @@ class MainWindow(qt_widgets.QMainWindow):
         console.logdebug("web page loaded [window]")
         self.web_app_loaded = True
         self.ui.send_button.setEnabled(True)
+        self.ui.screenshot_button.setEnabled(True)
         if self.pre_loaded_tree:
             javascript_command = "render_tree({{tree: {}}})".format(self.pre_loaded_tree)
             web_view_page = self.ui.web_view_group_box.ui.web_engine_view.page()
