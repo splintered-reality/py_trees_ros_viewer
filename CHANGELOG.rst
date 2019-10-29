@@ -5,7 +5,7 @@ Changelog
 Forthcoming
 -----------
 
-0.1.3 (2019-10-26)
+0.1.4 (2019-10-26)
 ------------------
 * [infra] update to make use of usability / performance improvements in ``py_trees_js v0.5.1``
 
