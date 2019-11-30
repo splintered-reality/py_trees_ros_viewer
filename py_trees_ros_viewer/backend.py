@@ -112,10 +112,13 @@ class Backend(qt_core.QObject):
             'Behaviour': '#555555',
             'Decorator': '#DDDDDD',
         }
+        print("DJS: Message Changed: {}".format(msg.changed))
         tree = {
+            'changed': "true" if msg.changed else "false",
             'timestamp': msg.statistics.stamp.sec + float(msg.statistics.stamp.nanosec) / 1.0e9,
             'behaviours': {},
             'visited_path': []}
+        print("DJS: Timestamp: {}".format(tree["timestamp"]))
         for behaviour in msg.behaviours:
             behaviour_id = str(conversions.msg_to_uuid4(behaviour.own_id))
             behaviour_type = conversions.msg_constant_to_behaviour_str(behaviour.type)

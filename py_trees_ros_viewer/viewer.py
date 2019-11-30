@@ -43,7 +43,8 @@ def send_tree_response(reply):
 
 @qt_core.pyqtSlot()
 def send_tree(web_view_page, demo_trees, unused_checked):
-    send_tree.index = 0 if send_tree.index == 2 else send_tree.index + 1
+    number_of_trees = len(demo_trees)
+    send_tree.index = 0 if send_tree.index == (number_of_trees - 1) else send_tree.index + 1
     demo_trees[send_tree.index]['timestamp'] = time.time()
     console.logdebug("send: tree '{}' [{}][viewer]".format(
         send_tree.index, demo_trees[send_tree.index]['timestamp'])
@@ -59,10 +60,11 @@ send_tree.index = 0
 def capture_screenshot(parent, web_engine_view, unused_checked):
     console.logdebug("captured screenshot [viewer]")
     file_dialog = qt_widgets.QFileDialog(parent)
-    file_dialog.setNameFilters([
-        "BMP Files (*.bmp)",
-        "JPEG Files (*.jpeg)",
-        "PNG Files (*.png)"
+    file_dialog.setNameFilters(
+        [
+            "BMP Files (*.bmp)",
+            "JPEG Files (*.jpeg)",
+            "PNG Files (*.png)"
         ]
     )
     file_dialog.selectNameFilter("PNG Files (*.png)")
@@ -133,9 +135,9 @@ def main():
     # sigslots
     window.ui.send_button.clicked.connect(
         functools.partial(
-             send_tree,
-             window.ui.web_view_group_box.ui.web_engine_view.page(),
-             demo_trees
+            send_tree,
+            window.ui.web_view_group_box.ui.web_engine_view.page(),
+            demo_trees
         )
     )
     window.ui.screenshot_button.clicked.connect(
