@@ -135,4 +135,9 @@ class Backend(qt_core.QObject):
                     'Feedback': behaviour.message,
                 },
             }
+            if behaviour.blackboard_access:
+                variables = []
+                for variable in behaviour.blackboard_access:
+                    variables.append(variable.key + " ({})".format(variable.value))
+                tree['behaviours'][behaviour_id]['data']['Blackboard'] = variables
         self.tree_snapshot_arrived.emit(tree)
