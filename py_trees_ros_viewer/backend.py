@@ -14,6 +14,7 @@ Ros backend for the viewer.
 # Imports
 ##############################################################################
 
+import copy
 import os
 import time
 
@@ -51,6 +52,7 @@ class Backend(qt_core.QObject):
         self.discovered_timestamp = time.monotonic()
         self.discovery_loop_time_sec = 3.0
         self.subscription = None
+        self.cached_blackboard = {"behaviours": {}, "data": {}}
 
     def spin(self):
         while rclpy.ok() and not self.shutdown_requested:
@@ -103,6 +105,11 @@ class Backend(qt_core.QObject):
 
         Args:
             msg: incoming serialised tree snapshot
+
+        Note: this uses a clever(?) hack to accumulate visited path snapshots of the blackboard
+        to gain a representation of the entire blackboard without having to transmit the
+        entire blackboard on every update. Special care is needed to make sure what has been
+        removed from the blackboard (does not get transmitted), actually gets removed.
         """
         console.logdebug("handling incoming tree snapshot [backend]")
         colours = {
@@ -112,13 +119,16 @@ class Backend(qt_core.QObject):
             'Behaviour': '#555555',
             'Decorator': '#DDDDDD',
         }
-        print("DJS: Message Changed: {}".format(msg.changed))
         tree = {
             'changed': "true" if msg.changed else "false",
             'timestamp': msg.statistics.stamp.sec + float(msg.statistics.stamp.nanosec) / 1.0e9,
             'behaviours': {},
+            'blackboard': {'behaviours': {}, 'data': {}},
             'visited_path': []}
-        print("DJS: Timestamp: {}".format(tree["timestamp"]))
+        # hack, update the blackboard from visited path contexts
+        blackboard_variables = {}
+        for blackboard_variable in msg.blackboard_on_visited_path:
+            blackboard_variables[blackboard_variable.key] = blackboard_variable.value
         for behaviour in msg.behaviours:
             behaviour_id = str(conversions.msg_to_uuid4(behaviour.own_id))
             behaviour_type = conversions.msg_constant_to_behaviour_str(behaviour.type)
@@ -140,4 +150,15 @@ class Backend(qt_core.QObject):
                 for variable in behaviour.blackboard_access:
                     variables.append(variable.key + " ({})".format(variable.value))
                 tree['behaviours'][behaviour_id]['data']['Blackboard'] = variables
+                tree['blackboard']['behaviours'][behaviour_id] = {variable.key: variable.value}
+                # hack, update the blackboard from visited path contexts
+                if (
+                    variable.key in self.cached_blackboard and
+                    variable.value != 'r' and
+                    variable.key not in blackboard_variables
+                ):
+                    del self.cached_blackboard[variable.key]
+        # hack, update the blackboard from visited path contexts
+        self.cached_blackboard.update(blackboard_variables)
+        tree['blackboard']['data'] = copy.deepcopy(self.cached_blackboard)
         self.tree_snapshot_arrived.emit(tree)
