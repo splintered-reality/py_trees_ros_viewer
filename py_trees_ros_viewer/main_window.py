@@ -60,6 +60,10 @@ class MainWindow(qt_widgets.QMainWindow):
     @qt_core.pyqtSlot(list)
     def on_discovered_topics_changed(self, discovered_topics):
         console.logdebug("discovered topics changed callback {}[window]".format(discovered_topics))
+        if (discovered_topics):
+            self.ui.send_button.setEnabled(False)
+        else:
+            self.ui.send_button.setEnabled(True)
 
         discovered_topics.sort()
 
@@ -93,8 +97,10 @@ class MainWindow(qt_widgets.QMainWindow):
     def onLoadFinished(self):
         console.logdebug("web page loaded [window]")
         self.web_app_loaded = True
-        self.ui.send_button.setEnabled(True)
+        self.ui.send_button.setEnabled((self.ui.topic_combo_box.currentIndex() == -1))
         self.ui.screenshot_button.setEnabled(True)
+        self.ui.blackboard_data_checkbox.setEnabled(True)
+        # self.ui.blackboard_activity_checkbox.setEnabled(True)
         if self.pre_loaded_tree:
             javascript_command = "render_tree({{tree: {}}})".format(self.pre_loaded_tree)
             web_view_page = self.ui.web_view_group_box.ui.web_engine_view.page()

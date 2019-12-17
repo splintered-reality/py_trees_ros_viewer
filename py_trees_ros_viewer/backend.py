@@ -21,6 +21,8 @@ import time
 import PyQt5.QtCore as qt_core
 
 import py_trees_ros_interfaces.msg as py_trees_msgs
+import rcl_interfaces.msg as rcl_msgs
+import rcl_interfaces.srv as rcl_srvs
 import rclpy
 
 from . import console
@@ -91,6 +93,7 @@ class Backend(qt_core.QObject):
         if self.subscription:
             console.logdebug("cancelling existing subscription [{}][backend]".format(self.subscription))
             self.node.destroy_subscription(self.subscription)
+            self.node.destroy_client(self.parameter_client)
         console.logdebug("creating a new subscription [{}][backend]".format(topic_name))
         self.subscription = self.node.create_subscription(
             msg_type=self.topic_type,
@@ -98,6 +101,20 @@ class Backend(qt_core.QObject):
             callback=self.tree_snapshot_handler,
             qos_profile=utilities.qos_profile_latched_topic()
         )
+        # dynamic parameter client
+        self.parameter_client = self.node.create_client(
+            rcl_srvs.SetParameters,
+            '/tree/set_parameters'  # TODO: dynamically get the namespace from topic_name and reconstruct
+        )
+
+    def snapshot_blackboard_data(self, snapshot: bool):
+        request = rcl_srvs.SetParameters.Request()
+        parameter = rcl_msgs.Parameter()
+        parameter.name = "snapshot_blackboard_data"
+        parameter.value.type = rcl_msgs.ParameterType.PARAMETER_BOOL
+        parameter.value.bool_value = snapshot
+        request.parameters.append(parameter)
+        unused_future = self.parameter_client.call_async(request)
 
     def tree_snapshot_handler(self, msg: py_trees_msgs.BehaviourTree):
         """

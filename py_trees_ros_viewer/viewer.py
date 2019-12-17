@@ -101,6 +101,20 @@ def capture_screenshot(parent, web_engine_view, unused_checked):
             extension = b'PNG'
         web_engine_view.grab().save(filename, extension)
 
+
+def on_blackboard_data_checked(backend, state: qt_core.Qt.Checked):
+    snapshot_blackboard_data = True if state == qt_core.Qt.Checked else False
+    if snapshot_blackboard_data:
+        console.logdebug("Blackboard data requested")
+    else:
+        console.logdebug("Blackboard data disabled")
+    backend.snapshot_blackboard_data(snapshot_blackboard_data)
+
+
+def on_blackboard_activity_checked(backend, state: qt_core.Qt.Checked):
+    console.logdebug("Blackboard activity checked")
+
+
 ##############################################################################
 # Main
 ##############################################################################
@@ -147,6 +161,19 @@ def main():
             window.ui.web_view_group_box.ui.web_engine_view,
         )
     )
+    window.ui.blackboard_data_checkbox.stateChanged.connect(
+        functools.partial(
+            on_blackboard_data_checked,
+            backend,
+        )
+    )
+    window.ui.blackboard_activity_checkbox.stateChanged.connect(
+        functools.partial(
+            on_blackboard_activity_checked,
+            backend,
+        )
+    )
+
     backend.discovered_topics_changed.connect(window.on_discovered_topics_changed)
     backend.tree_snapshot_arrived.connect(window.on_tree_snapshot_arrived)
     # two signals for the combo box are relevant
