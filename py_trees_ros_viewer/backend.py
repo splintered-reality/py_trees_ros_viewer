@@ -33,6 +33,19 @@ from . import utilities
 # Helpers
 ##############################################################################
 
+
+class Parameters(object):
+    """
+    Local representation of dynamic parameter for streaming
+    snapshot data. This is critical to have around to store the
+    user's desired settings so that when a connection is made,
+    they can be automagically applied.
+    """
+
+    def __init__(self):
+        self.snapshot_blackboard_data = False
+        self.snapshot_blackboard_activity = False
+
 ##############################################################################
 # Backend
 ##############################################################################
@@ -43,7 +56,7 @@ class Backend(qt_core.QObject):
     discovered_topics_changed = qt_core.pyqtSignal(list, name="discoveredTopicsChanged")
     tree_snapshot_arrived = qt_core.pyqtSignal(dict, name="treeSnapshotArrived")
 
-    def __init__(self):
+    def __init__(self, parameters):
         super().__init__()
         default_node_name = "tree_viewer_" + str(os.getpid())
         self.node = rclpy.create_node(default_node_name)
@@ -55,6 +68,8 @@ class Backend(qt_core.QObject):
         self.discovery_loop_time_sec = 3.0
         self.subscription = None
         self.cached_blackboard = {"behaviours": {}, "data": {}}
+        self.parameter_client = None
+        self.parameters = parameters
 
     def spin(self):
         while rclpy.ok() and not self.shutdown_requested:
@@ -106,15 +121,42 @@ class Backend(qt_core.QObject):
             rcl_srvs.SetParameters,
             '/tree/set_parameters'  # TODO: dynamically get the namespace from topic_name and reconstruct
         )
+        self.dynamically_reconfigure_parameters(
+            snapshot_blackboard_data=self.parameters.snapshot_blackboard_data,
+            snapshot_blackboard_activity=self.parameters.snapshot_blackboard_activity
+        )
+
+    def dynamically_reconfigure_parameters(
+            self,
+            snapshot_blackboard_data=None,
+            snapshot_blackboard_activity=None
+    ):
+        if self.parameter_client is not None:
+            request = rcl_srvs.SetParameters.Request()  # noqa
+            if snapshot_blackboard_data is not None:
+                parameter = rcl_msgs.Parameter()
+                parameter.name = "snapshot_blackboard_data"
+                parameter.value.type = rcl_msgs.ParameterType.PARAMETER_BOOL  # noqa
+                parameter.value.bool_value = snapshot_blackboard_data
+                request.parameters.append(parameter)
+            if snapshot_blackboard_activity is not None:
+                parameter = rcl_msgs.Parameter()
+                parameter.name = "snapshot_blackboard_activity"
+                parameter.value.type = rcl_msgs.ParameterType.PARAMETER_BOOL  # noqa
+                parameter.value.bool_value = snapshot_blackboard_activity
+                request.parameters.append(parameter)
+            unused_future = self.parameter_client.call_async(request)
 
     def snapshot_blackboard_data(self, snapshot: bool):
-        request = rcl_srvs.SetParameters.Request()
-        parameter = rcl_msgs.Parameter()
-        parameter.name = "snapshot_blackboard_data"
-        parameter.value.type = rcl_msgs.ParameterType.PARAMETER_BOOL
-        parameter.value.bool_value = snapshot
-        request.parameters.append(parameter)
-        unused_future = self.parameter_client.call_async(request)
+        if self.parameter_client is not None:
+            request = rcl_srvs.SetParameters.Request()  # noqa
+            parameter = rcl_msgs.Parameter()
+            parameter.name = "snapshot_blackboard_data"
+            parameter.value.type = rcl_msgs.ParameterType.PARAMETER_BOOL  # noqa
+            parameter.value.bool_value = snapshot
+            request.parameters.append(parameter)
+            unused_future = self.parameter_client.call_async(request)
+        self.parameters.snapshot_blackboard_data = snapshot
 
     def tree_snapshot_handler(self, msg: py_trees_msgs.BehaviourTree):
         """

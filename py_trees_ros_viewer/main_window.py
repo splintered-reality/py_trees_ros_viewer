@@ -121,9 +121,23 @@ class MainWindow(qt_widgets.QMainWindow):
         window_state = settings.value("window_state")  # full size, maximised, minimised, no state
         if window_state is not None:
             self.restoreState(window_state)
+        self.ui.blackboard_data_checkbox.setChecked(
+            settings.value("blackboard_data", defaultValue=True, type=bool)
+        )
+        self.ui.blackboard_data_checkbox.setChecked(
+            settings.value("blackboard_activity", defaultValue=False, type=bool)
+        )
 
     def writeSettings(self):
         console.logdebug("write settings [window]")
         settings = qt_core.QSettings("Splintered Reality", "PyTrees Viewer")
         settings.setValue("geometry", self.saveGeometry())
         settings.setValue("window_state", self.saveState())  # full size, maximised, minimised, no state
+        settings.setValue(
+            "blackboard_data",
+            self.ui.blackboard_data_checkbox.isChecked()
+        )
+        settings.setValue(
+            "blackboard_activity",
+            self.ui.blackboard_data_checkbox.isChecked()
+        )

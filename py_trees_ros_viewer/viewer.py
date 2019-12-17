@@ -103,12 +103,14 @@ def capture_screenshot(parent, web_engine_view, unused_checked):
 
 
 def on_blackboard_data_checked(backend, state: qt_core.Qt.Checked):
-    snapshot_blackboard_data = True if state == qt_core.Qt.Checked else False
-    if snapshot_blackboard_data:
+    backend.parameters.snapshot_blackboard_data = True if state == qt_core.Qt.Checked else False
+    if backend.parameters.snapshot_blackboard_data:
         console.logdebug("Blackboard data requested")
     else:
         console.logdebug("Blackboard data disabled")
-    backend.snapshot_blackboard_data(snapshot_blackboard_data)
+    backend.dynamically_reconfigure_parameters(
+        snapshot_blackboard_data=backend.parameters.snapshot_blackboard_data
+    )
 
 
 def on_blackboard_activity_checked(backend, state: qt_core.Qt.Checked):
@@ -131,7 +133,10 @@ def main():
     app = qt_widgets.QApplication(sys.argv)
     demo_trees = py_trees_js.viewer.trees.create_demo_tree_list()
     window = main_window.MainWindow()
-    backend = ros_backend.Backend()
+    parameters = ros_backend.Parameters()
+    parameters.snapshot_blackboard_data = window.ui.blackboard_data_checkbox.isChecked()
+    parameters.snapshot_blackboard_activity = window.ui.blackboard_activity_checkbox.isChecked()
+    backend = ros_backend.Backend(parameters)
 
     # sig interrupt handling
     #   use a timer to get out of the gui thread and
