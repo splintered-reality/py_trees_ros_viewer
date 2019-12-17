@@ -145,7 +145,7 @@ class Backend(qt_core.QObject):
                 parameter.value.type = rcl_msgs.ParameterType.PARAMETER_BOOL  # noqa
                 parameter.value.bool_value = snapshot_blackboard_activity
                 request.parameters.append(parameter)
-            unused_future = self.parameter_client.call_async(request)
+            # unused_future = self.parameter_client.call_async(request)
 
     def snapshot_blackboard_data(self, snapshot: bool):
         if self.parameter_client is not None:
