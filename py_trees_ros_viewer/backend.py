@@ -367,14 +367,18 @@ class Backend(qt_core.QObject):
                     variables.append(variable.key + " ({})".format(variable.value))
                 tree['behaviours'][behaviour_id]['data']['Blackboard'] = variables
                 tree['blackboard']['behaviours'][behaviour_id] = {variable.key: variable.value}
-                # hack, update the blackboard from visited path contexts
+                # delete keys from the cache if they aren't in the visited variables list when
+                # they should be (i.e. their parent behaviour is on the visited path and has
+                # 'w' or 'x' permissions on the variable).
                 if (
                     variable.key in self.cached_blackboard and
                     variable.value != 'r' and
+                    behaviour.is_active and
                     variable.key not in blackboard_variables
                 ):
                     del self.cached_blackboard[variable.key]
         # hack, update the blackboard from visited path contexts
         self.cached_blackboard.update(blackboard_variables)
-        tree['blackboard']['data'] = copy.deepcopy(self.cached_blackboard)
+        if self.snapshot_stream.parameters.blackboard_data:
+            tree['blackboard']['data'] = copy.deepcopy(self.cached_blackboard)
         self.tree_snapshot_arrived.emit(tree)
