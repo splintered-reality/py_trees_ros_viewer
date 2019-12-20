@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>2137</width>
-    <height>1127</height>
+    <width>1051</width>
+    <height>567</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -37,7 +37,7 @@
        <item>
         <widget class="QLabel" name="label">
          <property name="text">
-          <string>Topic</string>
+          <string>Namespace</string>
          </property>
         </widget>
        </item>
@@ -101,6 +101,19 @@
         </widget>
        </item>
        <item>
+        <widget class="QCheckBox" name="periodic_checkbox">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Periodic</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="screenshot_button">
          <property name="enabled">
           <bool>false</bool>
@@ -133,8 +146,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>2137</width>
-     <height>40</height>
+     <width>1051</width>
+     <height>29</height>
     </rect>
    </property>
    <property name="defaultUp">

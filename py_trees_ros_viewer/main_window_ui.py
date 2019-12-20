@@ -11,7 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(2137, 1127)
+        MainWindow.resize(1051, 567)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/images/tuxrobot.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         MainWindow.setWindowIcon(icon)
@@ -54,6 +54,11 @@ class Ui_MainWindow(object):
         self.blackboard_activity_checkbox.setChecked(False)
         self.blackboard_activity_checkbox.setObjectName("blackboard_activity_checkbox")
         self.horizontalLayout.addWidget(self.blackboard_activity_checkbox)
+        self.periodic_checkbox = QtWidgets.QCheckBox(self.tools_frame)
+        self.periodic_checkbox.setEnabled(False)
+        self.periodic_checkbox.setChecked(True)
+        self.periodic_checkbox.setObjectName("periodic_checkbox")
+        self.horizontalLayout.addWidget(self.periodic_checkbox)
         self.screenshot_button = QtWidgets.QPushButton(self.tools_frame)
         self.screenshot_button.setEnabled(False)
         self.screenshot_button.setObjectName("screenshot_button")
@@ -70,7 +75,7 @@ class Ui_MainWindow(object):
         self.verticalLayout.addWidget(self.web_view_group_box)
         MainWindow.setCentralWidget(self.central_display)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 2137, 40))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1051, 29))
         self.menubar.setDefaultUp(False)
         self.menubar.setObjectName("menubar")
         MainWindow.setMenuBar(self.menubar)
@@ -84,10 +89,11 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "PyTrees Viewer"))
-        self.label.setText(_translate("MainWindow", "Topic"))
+        self.label.setText(_translate("MainWindow", "Namespace"))
         self.send_button.setText(_translate("MainWindow", "Send Demo Tree"))
         self.blackboard_data_checkbox.setText(_translate("MainWindow", "Blackboard Data"))
         self.blackboard_activity_checkbox.setText(_translate("MainWindow", "Blackboard Activity"))
+        self.periodic_checkbox.setText(_translate("MainWindow", "Periodic"))
         self.screenshot_button.setText(_translate("MainWindow", "Screenshot"))
 
 from py_trees_ros_viewer.web_view import WebViewGroupBox
