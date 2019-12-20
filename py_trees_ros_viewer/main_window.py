@@ -125,7 +125,7 @@ class MainWindow(qt_widgets.QMainWindow):
         self.ui.blackboard_data_checkbox.setChecked(
             settings.value("blackboard_data", defaultValue=True, type=bool)
         )
-        self.ui.blackboard_data_checkbox.setChecked(
+        self.ui.blackboard_activity_checkbox.setChecked(
             settings.value("blackboard_activity", defaultValue=False, type=bool)
         )
         self.ui.periodic_checkbox.setChecked(
