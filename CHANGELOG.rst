@@ -5,6 +5,8 @@ Changelog
 Forthcoming
 -----------
 * [backend] feed the viewer blackboard access data, `#27 <https://github.com/splintered-reality/py_trees_ros_viewer/pull/27>`_
+* [all] machinery for activity streams, `#28 <https://github.com/splintered-reality/py_trees_ros_viewer/pull/28>`_
+
 0.1.4 (2019-10-26)
 ------------------
 * [infra] update to make use of usability / performance improvements in ``py_trees_js v0.5.1``
