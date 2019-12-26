@@ -97,9 +97,9 @@ class MainWindow(qt_widgets.QMainWindow):
         self.web_app_loaded = True
         self.ui.send_button.setEnabled((self.ui.topic_combo_box.currentIndex() == -1))
         self.ui.screenshot_button.setEnabled(True)
+        self.ui.blackboard_activity_checkbox.setEnabled(True)
         self.ui.blackboard_data_checkbox.setEnabled(True)
         self.ui.periodic_checkbox.setEnabled(True)
-        # self.ui.blackboard_activity_checkbox.setEnabled(True)
         if self.pre_loaded_tree:
             javascript_command = "render_tree({{tree: {}}})".format(self.pre_loaded_tree)
             web_view_page = self.ui.web_view_group_box.ui.web_engine_view.page()

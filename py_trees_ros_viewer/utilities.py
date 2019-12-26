@@ -18,6 +18,30 @@ Utilities for the py_trees ros viewer.
 import rclpy.qos
 
 ##############################################################################
+# Symbols
+##############################################################################
+
+
+class XhtmlSymbols(object):
+
+    def __init__(self):
+        self.space = '<text>&#xa0;</text>'
+        self.left_arrow = '<text>&#x2190;</text>'
+        self.right_arrow = '<text>&#x2192;</text>'
+        self.left_right_arrow = '<text>&#x2194;</text>'
+        self.bold = '<b>'
+        self.bold_reset = '</b>'
+        self.reset = '</text>'
+        self.normal = '<text>'
+        self.cyan = '<text style="color:cyan;">'
+        self.green = '<text style="color:green;">'
+        self.yellow = '<text style="color:darkgoldenrod;">'
+        self.red = '<text style="color:red;">'
+        self.monospace = '<text style="font-family: monospace;">'
+        self.multiplication_x = '<text>&#x2715;</text>'
+        self.forbidden_circle = '<text>&#x29B8;</text>'
+
+##############################################################################
 # Methods
 ##############################################################################
 

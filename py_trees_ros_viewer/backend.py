@@ -181,11 +181,14 @@ class SnapshotStream(object):
         console.logdebug("  ...ok [backend]")
 
     def shutdown(self):
-        if self.services["close"] is not None:
+        if rclpy.ok() and self.services["close"] is not None:
             request = self.service_types["close"].Request()
             request.topic_name = self.topic_name
             future = self.services["close"].call_async(request)
-            rclpy.spin_until_future_complete(self.node, future)
+            rclpy.spin_until_future_complete(
+                node=self.node,
+                future=future,
+                timeout_sec=0.5)
             unused_response = future.result()
 
     def create_service_client(self, key: str):
@@ -340,7 +343,8 @@ class Backend(qt_core.QObject):
             'timestamp': msg.statistics.stamp.sec + float(msg.statistics.stamp.nanosec) / 1.0e9,
             'behaviours': {},
             'blackboard': {'behaviours': {}, 'data': {}},
-            'visited_path': []}
+            'visited_path': []
+        }
         # hack, update the blackboard from visited path contexts
         blackboard_variables = {}
         for blackboard_variable in msg.blackboard_on_visited_path:
@@ -365,8 +369,8 @@ class Backend(qt_core.QObject):
                 variables = []
                 for variable in behaviour.blackboard_access:
                     variables.append(variable.key + " ({})".format(variable.value))
+                    tree['blackboard']['behaviours'].setdefault(behaviour_id, {})[variable.key] = variable.value
                 tree['behaviours'][behaviour_id]['data']['Blackboard'] = variables
-                tree['blackboard']['behaviours'][behaviour_id] = {variable.key: variable.value}
                 # delete keys from the cache if they aren't in the visited variables list when
                 # they should be (i.e. their parent behaviour is on the visited path and has
                 # 'w' or 'x' permissions on the variable).
@@ -381,4 +385,37 @@ class Backend(qt_core.QObject):
         self.cached_blackboard.update(blackboard_variables)
         if self.snapshot_stream.parameters.blackboard_data:
             tree['blackboard']['data'] = copy.deepcopy(self.cached_blackboard)
+        if self.snapshot_stream.parameters.blackboard_activity:
+            xhtml = utilities.XhtmlSymbols()
+            xhtml_snippet = "<table>"
+            for item in msg.blackboard_activity:
+                if item.activity_type == "READ":
+                    info = xhtml.normal + xhtml.left_arrow + xhtml.space + item.current_value + xhtml.reset
+                elif item.activity_type == "WRITE":
+                    info = xhtml.green + xhtml.right_arrow + xhtml.space + item.current_value + xhtml.reset
+                elif item.activity_type == "ACCESSED":
+                    info = xhtml.yellow + xhtml.left_right_arrow + xhtml.space + item.current_value + xhtml.reset
+                elif item.activity_type == "ACCESS_DENIED":
+                    info = xhtml.red + xhtml.multiplication_x + xhtml.space + "client has no read/write access" + xhtml.reset
+                elif item.activity_type == "NO_KEY":
+                    info = xhtml.red + xhtml.multiplication_x + xhtml.space + "key does not yet exist" + xhtml.reset
+                elif item.activity_type == "NO_OVERWRITE":
+                    info = xhtml.yellow + xhtml.forbidden_circle + xhtml.space + item.current_value + xhtml.reset
+                elif item.activity_type == "UNSET":
+                    info = ""
+                elif item.activity_type == "INITIALISED":
+                    info = xhtml.green + xhtml.right_arrow + xhtml.space + item.current_value + xhtml.reset
+                else:
+                    info = ""
+                xhtml_snippet += (
+                    "<tr>"
+                    "<td>" + xhtml.cyan + item.key + xhtml.reset + "</td>"
+                    "<td>" + xhtml.yellow + item.activity_type + xhtml.reset + "</td>"
+                    "<td>" + xhtml.normal + item.client_name + xhtml.reset + "</td>"
+                    "<td>" + info + "</td>"
+                    "</tr>"
+                )
+            xhtml_snippet += "</table>"
+            tree['activity'] = [xhtml_snippet]
+
         self.tree_snapshot_arrived.emit(tree)
