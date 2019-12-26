@@ -7,71 +7,55 @@
 ##############################################################################
 # Documentation
 ##############################################################################
+
 """
-Demo trees to feed to the web app
+Utilities for the py_trees ros viewer.
 """
 ##############################################################################
 # Imports
 ##############################################################################
 
-import time
-import typing
-
-import rclpy.node
 import rclpy.qos
+
+##############################################################################
+# Symbols
+##############################################################################
+
+
+class XhtmlSymbols(object):
+
+    def __init__(self):
+        self.space = '<text>&#xa0;</text>'
+        self.left_arrow = '<text>&#x2190;</text>'
+        self.right_arrow = '<text>&#x2192;</text>'
+        self.left_right_arrow = '<text>&#x2194;</text>'
+        self.bold = '<b>'
+        self.bold_reset = '</b>'
+        self.reset = '</text>'
+        self.normal = '<text>'
+        self.cyan = '<text style="color:cyan;">'
+        self.green = '<text style="color:green;">'
+        self.yellow = '<text style="color:darkgoldenrod;">'
+        self.red = '<text style="color:red;">'
+        self.monospace = '<text style="font-family: monospace;">'
+        self.multiplication_x = '<text>&#x2715;</text>'
+        self.forbidden_circle = '<text>&#x29B8;</text>'
 
 ##############################################################################
 # Methods
 ##############################################################################
 
 
-def find_topics(
-        node: rclpy.node.Node,
-        topic_type: str,
-        namespace: str=None,
-        timeout: float=0.5) -> typing.List[str]:
+def parent_namespace(
+    name: str
+):
     """
-    Discover a topic of the specified type and if necessary, under the specified
-    namespace.
-
-    .. note: This method has been reproduced from py_trees_ros.utilities to decouple
-    dependencies between the viewer and the core py_trees libraries.
-
-    Args:
-        node: nodes have the discovery methods
-        topic_type: primary lookup hint
-        namespace: secondary lookup hint
-        timeout: check every 0.1s until this timeout is reached (can be None -> checks once)
-
-    .. note: Immediately post node creation, it can take some time to discover the graph.
-
-    Returns:
-        list of fully expanded topic names (can be empty)
+    Get the parent namespace of this ros name.
     """
-    # TODO: follow the pattern of ros2cli to create a node without the need to init
-    # rcl (might get rid of the magic sleep this way). See:
-    #    https://github.com/ros2/ros2cli/blob/master/ros2service/ros2service/verb/list.py
-    #    https://github.com/ros2/ros2cli/blob/master/ros2cli/ros2cli/node/strategy.py
-    loop_period = 0.1  # seconds
-    clock = rclpy.clock.Clock()
-    start_time = clock.now()
-    topic_names = []
-    while True:
-        # Returns a list of the form: [('exchange/blackboard', ['std_msgs/String'])
-        topic_names_and_types = node.get_topic_names_and_types()
-        topic_names = [name for name, types in topic_names_and_types if topic_type in types]
-        if namespace is not None:
-            topic_names = [name for name in topic_names if namespace in name]
-        if topic_names:
-            break
-        if timeout is None or (clock.now() - start_time) > rclpy.time.Duration(seconds=timeout):
-            break
-        else:
-            time.sleep(loop_period)
-    return topic_names
+    return "/".join(name.split("/")[:-1])
 
 
-def qos_profile_latched_topic() -> rclpy.qos.QoSProfile:
+def qos_profile_latched() -> rclpy.qos.QoSProfile:
     """
     Convenience retrieval for a latched topic (publisher / subscriber)
     """

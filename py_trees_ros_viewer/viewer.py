@@ -16,6 +16,7 @@ A qt-javascript application for viewing executing or replaying py_trees
 
 import datetime
 import functools
+import math
 import os
 import signal
 import sys
@@ -101,6 +102,43 @@ def capture_screenshot(parent, web_engine_view, unused_checked):
             extension = b'PNG'
         web_engine_view.grab().save(filename, extension)
 
+
+def on_blackboard_data_checked(backend, state: qt_core.Qt.Checked):
+    with backend.lock:
+        backend.parameters.blackboard_data = True if state == qt_core.Qt.Checked else False
+    if state == qt_core.Qt.Checked:
+        console.logdebug("Blackboard data requested")
+    else:
+        console.logdebug("Blackboard data disabled")
+
+
+def on_blackboard_activity_checked(backend, state: qt_core.Qt.Checked):
+    with backend.lock:
+        backend.parameters.blackboard_activity = True if state == qt_core.Qt.Checked else False
+    if state == qt_core.Qt.Checked:
+        console.logdebug("Blackboard activity requested")
+    else:
+        console.logdebug("Blackboard activity disabled")
+
+
+def on_periodic_checked(backend, state: qt_core.Qt.Checked):
+    with backend.lock:
+        backend.parameters.snapshot_period = 2.0 if state == qt_core.Qt.Checked else math.inf
+    if state == qt_core.Qt.Checked:
+        console.logdebug("Periodic snapshots requested")
+    else:
+        console.logdebug("Periodic snapshots disabled")
+
+
+def on_connection_request(backend, namespace: str):
+    """
+    Enqueue a connection request.
+
+    Cannot directly make the connection here since this is invariably the qt thread.
+    """
+    with backend.lock:
+        backend.enqueued_connection_request_namespace = namespace
+
 ##############################################################################
 # Main
 ##############################################################################
@@ -117,7 +155,13 @@ def main():
     app = qt_widgets.QApplication(sys.argv)
     demo_trees = py_trees_js.viewer.trees.create_demo_tree_list()
     window = main_window.MainWindow()
-    backend = ros_backend.Backend()
+    snapshot_period = 2.0 if window.ui.periodic_checkbox.isChecked() else math.inf
+    backend = ros_backend.Backend(
+        parameters=ros_backend.SnapshotStream.Parameters(
+            blackboard_data=window.ui.blackboard_data_checkbox.isChecked(),
+            blackboard_activity=window.ui.blackboard_activity_checkbox.isChecked(),
+            snapshot_period=snapshot_period)
+    )
 
     # sig interrupt handling
     #   use a timer to get out of the gui thread and
@@ -147,13 +191,37 @@ def main():
             window.ui.web_view_group_box.ui.web_engine_view,
         )
     )
-    backend.discovered_topics_changed.connect(window.on_discovered_topics_changed)
+    window.ui.blackboard_data_checkbox.stateChanged.connect(
+        functools.partial(
+            on_blackboard_data_checked,
+            backend,
+        )
+    )
+    window.ui.blackboard_activity_checkbox.stateChanged.connect(
+        functools.partial(
+            on_blackboard_activity_checked,
+            backend,
+        )
+    )
+    window.ui.periodic_checkbox.stateChanged.connect(
+        functools.partial(
+            on_periodic_checked,
+            backend,
+        )
+    )
+    window.ui.topic_combo_box.currentTextChanged.connect(
+        functools.partial(
+            on_connection_request,
+            backend
+        )
+    )
+
+    backend.discovered_namespaces_changed.connect(window.on_discovered_namespaces_changed)
     backend.tree_snapshot_arrived.connect(window.on_tree_snapshot_arrived)
     # two signals for the combo box are relevant
     #   activated - only when there is a user interaction
     #   currentTextChanged - when there is a programmatic OR user interaction
     # window.ui.topic_combo_box.activated.connect(backend.connect)
-    window.ui.topic_combo_box.currentTextChanged.connect(backend.connect)
     window.request_shutdown.connect(backend.terminate_ros_spinner)
 
     # qt/ros bringup

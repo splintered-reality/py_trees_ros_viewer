@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>799</width>
-    <height>356</height>
+    <width>1051</width>
+    <height>567</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,7 +18,7 @@
     <normaloff>:/images/tuxrobot.png</normaloff>:/images/tuxrobot.png</iconset>
   </property>
   <widget class="QWidget" name="central_display">
-   <layout class="QVBoxLayout" name="verticalLayout_4">
+   <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <widget class="QFrame" name="tools_frame">
       <property name="sizePolicy">
@@ -37,7 +37,7 @@
        <item>
         <widget class="QLabel" name="label">
          <property name="text">
-          <string>Topic</string>
+          <string>Namespace</string>
          </property>
         </widget>
        </item>
@@ -48,6 +48,16 @@
          </property>
          <property name="sizeAdjustPolicy">
           <enum>QComboBox::AdjustToContents</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="send_button">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Send Demo Tree</string>
          </property>
         </widget>
        </item>
@@ -65,22 +75,51 @@
         </spacer>
        </item>
        <item>
+        <widget class="QCheckBox" name="blackboard_data_checkbox">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Blackboard Data</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="blackboard_activity_checkbox">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Blackboard Activity</string>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="periodic_checkbox">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Periodic</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="screenshot_button">
          <property name="enabled">
           <bool>false</bool>
          </property>
          <property name="text">
           <string>Screenshot</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="send_button">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="text">
-          <string>Send Demo Tree</string>
          </property>
         </widget>
        </item>
@@ -107,8 +146,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>799</width>
-     <height>35</height>
+     <width>1051</width>
+     <height>29</height>
     </rect>
    </property>
    <property name="defaultUp">
