@@ -15,8 +15,6 @@ Launch a qt dashboard for the tutorials.
 # Imports
 ##############################################################################
 
-import json
-
 import PyQt5.QtCore as qt_core
 import PyQt5.QtWidgets as qt_widgets
 
