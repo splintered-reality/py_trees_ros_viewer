@@ -410,8 +410,8 @@ class Backend(qt_core.QObject):
                 xhtml_snippet += (
                     "<tr>"
                     "<td>" + xhtml.cyan + item.key + xhtml.reset + "</td>"
-                    "<td>" + xhtml.yellow + item.activity_type + xhtml.reset + "</td>"
-                    "<td>" + xhtml.normal + item.client_name + xhtml.reset + "</td>"
+                    "<td style='text-align: center;'>" + xhtml.yellow + item.activity_type + xhtml.reset + "</td>"
+                    "<td style='text-align: center;'>" + xhtml.normal + item.client_name + xhtml.reset + "</td>"
                     "<td>" + info + "</td>"
                     "</tr>"
                 )
