@@ -4,6 +4,14 @@ Changelog
 
 Forthcoming
 -----------
+* ...
+
+0.2.1 (2019-12-28)
+------------------
+* [docs] usage instructions
+
+0.2.0 (2019-12-28)
+------------------
 * [backend] feed the viewer blackboard access data, `#27 <https://github.com/splintered-reality/py_trees_ros_viewer/pull/27>`_
 * [all] machinery for activity streams, `#28 <https://github.com/splintered-reality/py_trees_ros_viewer/pull/28>`_
 
