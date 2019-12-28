@@ -1,5 +1,9 @@
 # PyTrees Ros Viewer
 
+[[About](#about)] [[Features](#features)] [[Quickstart](#quickstart)] [[Usage](#usage)] [[Modding](#modding)]
+
+## About
+
 A Qt-JS application for visualisation of behaviour trees in a ROS2 ecosystem. This
 implementation serves as the gui visualisation tool for
 [ROS2 PyTrees](https://github.com/splintered-reality/py_trees_ros#pytrees-ros-ecosystem).
