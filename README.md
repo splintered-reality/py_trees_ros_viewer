@@ -1,11 +1,8 @@
 # PyTrees Ros Viewer
 
-A Qt-JS application for visualisation of executing/log-replayed behaviour trees
-in a ROS2 ecosystem. It currently services as the gui visualisation tool for
-[ROS2 PyTrees](https://github.com/splintered-reality/py_trees_ros#pytrees-ros-ecosystem),
-but has been designed such that it could be extended for use with
-other behaviour tree implementations. Create an issue here if you'd like to work
-through details on this.  
+A Qt-JS application for visualisation of behaviour trees in a ROS2 ecosystem. This
+implementation serves as the gui visualisation tool for
+[ROS2 PyTrees](https://github.com/splintered-reality/py_trees_ros#pytrees-ros-ecosystem).
 
 ## Features
 
@@ -32,7 +29,7 @@ ros2 run py_trees_ros_tutorials tutorial-eight-dynamic-application-loading
 
 ## Usage
 
-Until a snapshot stream is found or selected, you'll land at the splash screen which
+Until a snapshot stream is discovered or selected, you'll land at the splash screen which
 enumerates the interactive options available.
 
 ![Splash](images/splash.png?raw=true "Splash Screen")
@@ -78,3 +75,34 @@ Travelling along the timeline is possible even while online. Simply hit the 'Res
 button to resume visualisation of the live feed.
 
 ![Resume](images/resume.png?raw=true "Resume")
+
+## Modding
+
+The underlying `py_trees_js` library lends itself to being used in various ways. This
+application can be used as a baseline reference (since it utilises the underlying
+`py_trees_js` library fully) for modifications to suit your own use case. Open an
+[issue](https://github.com/splintered-reality/py_trees_ros_viewer/issues) if you have
+questions and/or would like assistance.
+
+1) Visualisation for a behaviour trees implementation that is not `py_trees`.
+
+Replicate the hybrid qt-js application here and replace [backend.py](https://github.com/splintered-reality/py_trees_ros_viewer/blob/devel/py_trees_ros_viewer/backend.py).
+The data structure eventually passed to the js library is a json dictionary that only
+makes use of the most fundamental properties of behaviour trees (e.g. tree graph
+structure, behaviour status) and consequently, it should be a matter of merely
+wiring connections and converting data.
+
+2) Visualisation for a different middleware architecture
+
+This follows much the same procedure as for the first use case - replace
+[backend.py](https://github.com/splintered-reality/py_trees_ros_viewer/blob/devel/py_trees_ros_viewer/backend.py). For example, a ROS1 viewer for py_trees
+could be built in this manner.
+
+3) Visualisation in a mobile device
+
+Since the core of the application is a js library, the bridge to moving from a
+developer friendly application to a lightweight web application, or a widget embedded
+in another web application is much smaller. Again it is merely a matter of
+generating the required input channel and data conversions. Refer to the
+`py_trees_js` [README](https://github.com/splintered-reality/py_trees_js#usage) for more
+details.
