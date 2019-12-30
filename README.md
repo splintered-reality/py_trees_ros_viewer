@@ -26,7 +26,7 @@ sudo apt install ros-<rosdistro>-py-trees-ros-viewer
 # In a first shell
 py-trees-tree-viewer
 # In a second shell
-ros2 run py_trees_ros_tutorials tutorial-eight-dynamic-application-loading
+ros2 launch py_trees_ros_tutorials tutorial_eight_dynamic_application_laoding_launch.py
 # Click 'Scan' on the qt robot dashboard interface
 # Wear a colander, I am too.
 ```
