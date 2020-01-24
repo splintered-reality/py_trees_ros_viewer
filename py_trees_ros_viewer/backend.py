@@ -359,6 +359,7 @@ class Backend(qt_core.QObject):
                 'status': conversions.msg_constant_to_status_str(behaviour.status),
                 'name': utilities.normalise_name_strings(behaviour.name),
                 'colour': colours[behaviour_type],
+                'details': behaviour.additional_detail,
                 'children': [str(conversions.msg_to_uuid4(child_id)) for child_id in behaviour.child_ids],
                 'data': {
                     'Class': behaviour.class_name,
