@@ -4,7 +4,7 @@ Changelog
 
 Forthcoming
 -----------
-* ...
+* [backend] capture paralell policy details
 
 0.2.2 (2019-12-30)
 ------------------
