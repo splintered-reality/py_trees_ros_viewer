@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>py_trees_ros_viewer</name>
-  <version>0.2.2</version>
+  <version>0.2.3</version>
   <description>
     A Qt-JS application for visualisation of executing/log-replayed behaviour trees in a ROS2 ecosystem.
   </description>
