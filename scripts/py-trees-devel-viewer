@@ -21,16 +21,24 @@ cd ${PWD}/../py_trees_ros_viewer && ./gen.bash
 # Setup
 ###########################
 
-if [ ! -d "${DIR}" ]; then
-  mkdir -p ${DIR}
-  rsync -av --delete --exclude=/Singleton* --exclude=/Session* ~/.config/google-chrome/ ${DIR}
-fi
+# Clear out the old user data
+rm -rf ${DIR}
+
+# Sync'ing to a user directory doesn't seem to be necessary if I use $OPTIONS1
+
+#if [ ! -d "${DIR}" ]; then
+#  mkdir -p ${DIR}
+#  rsync -av --delete --exclude=/Singleton* --exclude=/Session* ~/.config/google-chrome/ ${DIR}
+#fi
 
 ###########################
 # Launch
 ###########################
-
-google-chrome ${OPTIONS} --user-data-dir=${DIR} --app=http://127.0.0.1:12345 > /dev/null 2>&1 &
+OPTIONS1="--no-first-run --activate-on-launch --no-default-browser-check --allow-file-access-from-files"
+# These are to work around chrome 80+ incompatibility: 
+#  https://stackoverflow.com/questions/60182668/chrome-devtools-inspector-showing-blank-white-screen-while-debugging-with-samsun
+OPTIONS2="--enable-blink-features=ShadowDOMV0 --enable-blink-features=CustomElementsV0"
+google-chrome ${OPTIONS1} ${OPTIONS2} --user-data-dir=${DIR} --app=http://127.0.0.1:12345 > /dev/null 2>&1 &
 pid=$!
 
 py-trees-tree-viewer
