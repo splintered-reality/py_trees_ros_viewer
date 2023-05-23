@@ -296,7 +296,7 @@ class Backend(qt_core.QObject):
             namespace: in which to find snapshot stream services
         """
         if self.snapshot_stream is not None:
-            console.logdebug("cancelling existing snapshot stream connection [{}][backend]".format(self.snapshot_stream_watcher))
+            console.logdebug("cancelling existing snapshot stream connection [{}][backend]".format(self.snapshot_stream))
             self.snapshot_stream.shutdown()
             self.snapshot_stream = None
         console.logdebug("creating a new snapshot stream connection [{}][backend]".format(namespace))
