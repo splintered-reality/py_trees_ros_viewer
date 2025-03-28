@@ -139,6 +139,15 @@ def on_connection_request(backend, namespace: str):
     with backend.lock:
         backend.enqueued_connection_request_namespace = namespace
 
+def on_connection_reload_request(backend, window):
+    """
+    Enqueue a connection request.
+
+    Cannot directly make the connection here since this is invariably the qt thread.
+    """
+    namespace = window.ui.topic_combo_box.currentText()
+    on_connection_request(backend, namespace)
+
 ##############################################################################
 # Main
 ##############################################################################
@@ -182,6 +191,13 @@ def main():
             send_tree,
             window.ui.web_view_group_box.ui.web_engine_view.page(),
             demo_trees
+        )
+    )
+    window.ui.reload_button.clicked.connect(
+        functools.partial(
+            on_connection_reload_request,
+            backend,
+            window,
         )
     )
     window.ui.screenshot_button.clicked.connect(

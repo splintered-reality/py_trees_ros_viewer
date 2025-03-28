@@ -95,6 +95,7 @@ class SnapshotStream(object):
 
         self.topic_name = None
         self.subscriber = None
+        self.connected = False
 
         self.services = {
             'open': None,
@@ -119,6 +120,8 @@ class SnapshotStream(object):
         }
         # create service clients
         self.services["open"] = self.create_service_client(key="open")
+        if self.services["open"] is None:
+            return  # Prevent from waiting more time for other services and exit earlier.
         self.services["close"] = self.create_service_client(key="close")
         self.services["reconfigure"] = self.create_service_client(key="reconfigure")
 
@@ -160,7 +163,13 @@ class SnapshotStream(object):
         request.parameters.snapshot_period = self.parameters.snapshot_period
         console.logdebug("establishing a snapshot stream connection [{}][backend]".format(self.namespace))
         future = self.services["open"].call_async(request)
-        rclpy.spin_until_future_complete(self.node, future)
+        start_time = time.monotonic()
+        while not future.done():
+            elapsed_time = time.monotonic() - start_time
+            if elapsed_time > timeout_sec:
+                console.logerror(f"Timed out waiting to open a connection")
+                return
+            rclpy.spin_once(self.node, timeout_sec=0.1)
         response = future.result()
         self.topic_name = response.topic_name
         # connect to a snapshot stream
@@ -168,7 +177,9 @@ class SnapshotStream(object):
         while True:
             elapsed_time = time.monotonic() - start_time
             if elapsed_time > timeout_sec:
-                raise exceptions.TimedOutError("timed out waiting for a snapshot stream publisher [{}]".format(self.topic_name))
+                console.logerror(f"Timed out waiting for a snapshot stream publisher [{self.topic_name}]")
+                self.connected = False
+                return
             if self.node.count_publishers(self.topic_name) > 0:
                 break
             time.sleep(0.1)
@@ -178,10 +189,11 @@ class SnapshotStream(object):
             callback=self.callback,
             qos_profile=utilities.qos_profile_latched()
         )
+        self.connected = True
         console.logdebug("  ...ok [backend]")
 
     def shutdown(self):
-        if rclpy.ok() and self.services["close"] is not None:
+        if rclpy.ok() and self.services["close"] is not None and self.topic_name is not None:
             request = self.service_types["close"].Request()
             request.topic_name = self.topic_name
             future = self.services["close"].call_async(request)
@@ -197,6 +209,9 @@ class SnapshotStream(object):
 
         Args:
             key: one of 'open', 'close'.
+        
+        Returns:
+            A client if successful, else None.
 
         Raises:
             :class:`~py_trees_ros.exceptions.NotReadyError`: if setup() wasn't called to identify the relevant services to connect to.
@@ -213,9 +228,8 @@ class SnapshotStream(object):
         )
         # hardcoding timeouts will get us into trouble
         if not client.wait_for_service(timeout_sec=3.0):
-            raise exceptions.TimedOutError(
-                "timed out waiting for {}".format(self.service_names['close'])
-            )
+            console.logdebug(f"Timed out waiting for {self.service_names['close']}")
+            return None
         return client
 
 ##############################################################################
@@ -253,10 +267,12 @@ class Backend(qt_core.QObject):
                 if self.parameters != old_parameters:
                     if self.snapshot_stream is not None:
                         self.snapshot_stream.reconfigure(self.parameters)
-                old_parameters = copy.copy(self.parameters)
+                    old_parameters = copy.copy(self.parameters)
                 if self.enqueued_connection_request_namespace is not None:
                     self.connect(self.enqueued_connection_request_namespace)
-                    self.enqueued_connection_request_namespace = None
+                    # If connection failed, keep retrying with the latest enqueued namespace.
+                    if self.snapshot_stream.connected:
+                        self.enqueued_connection_request_namespace = None
             rclpy.spin_once(self.node, timeout_sec=0.1)
         if self.snapshot_stream is not None:
             self.snapshot_stream.shutdown()

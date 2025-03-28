@@ -60,8 +60,10 @@ class MainWindow(qt_widgets.QMainWindow):
         console.logdebug("discovered namespaces changed callback {}[window]".format(discovered_namespaces))
         if (discovered_namespaces):
             self.ui.send_button.setEnabled(False)
+            self.ui.reload_button.setEnabled(True)
         else:
             self.ui.send_button.setEnabled(True)
+            self.ui.reload_button.setEnabled(False)
 
         discovered_namespaces.sort()
 
@@ -96,6 +98,7 @@ class MainWindow(qt_widgets.QMainWindow):
         console.logdebug("web page loaded [window]")
         self.web_app_loaded = True
         self.ui.send_button.setEnabled((self.ui.topic_combo_box.currentIndex() == -1))
+        self.ui.reload_button.setEnabled(False)
         self.ui.screenshot_button.setEnabled(True)
         self.ui.blackboard_activity_checkbox.setEnabled(True)
         self.ui.blackboard_data_checkbox.setEnabled(True)
