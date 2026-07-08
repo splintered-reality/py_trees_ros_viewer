@@ -117,13 +117,16 @@ class SnapshotStream(object):
             'close': py_trees_srvs.CloseSnapshotStream,
             'reconfigure': py_trees_srvs.ReconfigureSnapshotStream
         }
-        # create service clients
-        self.services["open"] = self.create_service_client(key="open")
-        self.services["close"] = self.create_service_client(key="close")
-        self.services["reconfigure"] = self.create_service_client(key="reconfigure")
-
-        # create connection
-        self._connect_on_init()
+        # create service clients and the connection, cleaning up behind
+        # itself if any step fails (e.g., the tree application vanished)
+        try:
+            self.services["open"] = self.create_service_client(key="open")
+            self.services["close"] = self.create_service_client(key="close")
+            self.services["reconfigure"] = self.create_service_client(key="reconfigure")
+            self._connect_on_init()
+        except exceptions.TimedOutError:
+            self.destroy_communications()
+            raise
 
     def reconfigure(self, parameters: 'SnapshotStream.Parameters'):
         """
@@ -160,8 +163,12 @@ class SnapshotStream(object):
         request.parameters.snapshot_period = self.parameters.snapshot_period
         console.logdebug("establishing a snapshot stream connection [{}][backend]".format(self.namespace))
         future = self.services["open"].call_async(request)
-        rclpy.spin_until_future_complete(self.node, future)
+        rclpy.spin_until_future_complete(self.node, future, timeout_sec=timeout_sec)
         response = future.result()
+        if response is None:
+            raise exceptions.TimedOutError(
+                "timed out waiting for a response from '{}'".format(self.service_names["open"])
+            )
         self.topic_name = response.topic_name
         # connect to a snapshot stream
         start_time = time.monotonic()
@@ -181,7 +188,12 @@ class SnapshotStream(object):
         console.logdebug("  ...ok [backend]")
 
     def shutdown(self):
-        if rclpy.ok() and self.services["close"] is not None:
+        if (
+            rclpy.ok() and
+            self.topic_name is not None and
+            self.services["close"] is not None and
+            self.services["close"].service_is_ready()
+        ):
             request = self.service_types["close"].Request()
             request.topic_name = self.topic_name
             future = self.services["close"].call_async(request)
@@ -190,6 +202,20 @@ class SnapshotStream(object):
                 future=future,
                 timeout_sec=0.5)
             unused_response = future.result()
+        self.destroy_communications()
+
+    def destroy_communications(self):
+        """
+        Destroy the subscriber and service clients so they don't linger
+        on the node after this stream has been discarded.
+        """
+        if self.subscriber is not None:
+            self.node.destroy_subscription(self.subscriber)
+            self.subscriber = None
+        for key, client in self.services.items():
+            if client is not None:
+                self.node.destroy_client(client)
+                self.services[key] = None
 
     def create_service_client(self, key: str):
         """
@@ -239,6 +265,7 @@ class Backend(qt_core.QObject):
         self.discovery_loop_time_sec = 3.0
         self.cached_blackboard = {"behaviours": {}, "data": {}}
         self.snapshot_stream = None
+        self.connected_namespace = None
         self.parameters = parameters
 
         self.lock = threading.Lock()
@@ -257,6 +284,8 @@ class Backend(qt_core.QObject):
                 if self.enqueued_connection_request_namespace is not None:
                     self.connect(self.enqueued_connection_request_namespace)
                     self.enqueued_connection_request_namespace = None
+                else:
+                    self.maintain_connection()
             rclpy.spin_once(self.node, timeout_sec=0.1)
         if self.snapshot_stream is not None:
             self.snapshot_stream.shutdown()
@@ -292,6 +321,10 @@ class Backend(qt_core.QObject):
         """
         Cancel the current connection and create a new one to the specified namespace.
 
+        If the connection attempt fails (e.g., the tree application disappeared
+        in the meantime), it will be retried via :meth:`maintain_connection`
+        as soon as the snapshot stream services are rediscovered.
+
         Args:
             namespace: in which to find snapshot stream services
         """
@@ -299,13 +332,42 @@ class Backend(qt_core.QObject):
             console.logdebug("cancelling existing snapshot stream connection [{}][backend]".format(self.snapshot_stream))
             self.snapshot_stream.shutdown()
             self.snapshot_stream = None
+        self.connected_namespace = namespace
         console.logdebug("creating a new snapshot stream connection [{}][backend]".format(namespace))
-        self.snapshot_stream = SnapshotStream(
-            node=self.node,
-            namespace=namespace,
-            callback=self.tree_snapshot_handler,
-            parameters=self.parameters
-        )
+        try:
+            self.snapshot_stream = SnapshotStream(
+                node=self.node,
+                namespace=namespace,
+                callback=self.tree_snapshot_handler,
+                parameters=self.parameters
+            )
+        except exceptions.TimedOutError as e:
+            console.logwarn("failed to connect, will retry when services reappear [{}][{}][backend]".format(namespace, str(e)))
+
+    def maintain_connection(self):
+        """
+        Check the health of the current snapshot stream and reconnect if it died.
+
+        When the tree application restarts, it does so with new snapshot
+        stream services and topics (albeit under the same namespace), leaving
+        this viewer connected to topics that no longer have a publisher. Detect
+        that and re-establish the connection as soon as the services reappear.
+        """
+        if self.connected_namespace is None:
+            return
+        if self.snapshot_stream is not None:
+            if self.snapshot_stream.topic_name is None:
+                return
+            if self.node.count_publishers(self.snapshot_stream.topic_name) == 0:
+                console.logwarn("lost connection to the snapshot stream [{}][backend]".format(self.snapshot_stream.topic_name))
+                self.snapshot_stream.shutdown()
+                self.snapshot_stream = None
+        if self.snapshot_stream is None:
+            open_service_name = self.connected_namespace + "/open"
+            service_names_and_types = self.node.get_service_names_and_types()
+            if any(name == open_service_name for name, unused_types in service_names_and_types):
+                console.loginfo("snapshot stream services rediscovered, reconnecting [{}][backend]".format(self.connected_namespace))
+                self.connect(self.connected_namespace)
 
     def snapshot_blackboard_data(self, snapshot: bool):
         if self.parameter_client is not None:
