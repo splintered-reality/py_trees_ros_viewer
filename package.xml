@@ -23,7 +23,11 @@
 
   <exec_depend>py_trees_ros_interfaces</exec_depend>
   <exec_depend>py_trees_js</exec_depend>
-  <exec_depend>python3-pyqt5</exec_depend>
+  <!-- 
+    The python3-pyqt5 rosdep key pulls in python3-sip-dev, which no longer exists on Ubuntu 26.04+ (lyrical and rolling).
+    See https://github.com/ros/rosdistro/pull/52527 for a fix, which could remove these conditions.
+  -->
+  <exec_depend condition="$ROS_DISTRO != lyrical and $ROS_DISTRO != rolling">python3-pyqt5</exec_depend>
   <exec_depend>python3-pyqt5.qtwebengine</exec_depend>
   <exec_depend>rclpy</exec_depend>
   <exec_depend>unique_identifier_msgs</exec_depend>
