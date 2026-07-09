@@ -39,21 +39,44 @@ class MainWindow(qt_widgets.QMainWindow):
         self.ui.web_view_group_box.ui.web_engine_view.loadFinished.connect(self.onLoadFinished)
         self.web_app_loaded = False
         self.pre_loaded_tree = None
+        self.pending_tree = None
+        self.render_in_flight = False
 
     @qt_core.pyqtSlot(dict)
     def on_tree_snapshot_arrived(self, tree):
+        """
+        Coalesce incoming snapshots - only ever have one render in flight and
+        keep no more than the latest arrival pending. Without this, snapshots
+        arriving faster than the web app can render them (e.g., large blackboard
+        payloads) queue without bound and the app appears to hang.
+        """
         if self.web_app_loaded:
-            javascript_command = "render_tree({{tree: {}}})".format(tree)
-            web_view_page = self.ui.web_view_group_box.ui.web_engine_view.page()
-            web_view_page.runJavaScript(javascript_command, self.on_tree_rendered)
+            self.pending_tree = tree
+            if not self.render_in_flight:
+                self.render_pending_tree()
         else:
             self.pre_loaded_tree = tree
+
+    def render_pending_tree(self):
+        tree = self.pending_tree
+        self.pending_tree = None
+        if tree is None:
+            return
+        self.render_in_flight = True
+        javascript_command = "render_tree({{tree: {}}})".format(tree)
+        web_view_page = self.ui.web_view_group_box.ui.web_engine_view.page()
+        web_view_page.runJavaScript(javascript_command, self.on_tree_rendered)
 
     def on_tree_rendered(self, response):
         """
         Callback triggered on a response being received from the js render_tree method.
+
+        Kicks off a render of the most recently arrived snapshot if one queued
+        up while this render was in flight.
         """
         console.logdebug("response from js/render_tree ['{}'][window]".format(response))
+        self.render_in_flight = False
+        self.render_pending_tree()
 
     @qt_core.pyqtSlot()
     def on_connection_reset(self):
@@ -61,6 +84,7 @@ class MainWindow(qt_widgets.QMainWindow):
         Clear the timeline cache so that snapshots from a previous connection
         (e.g., pre-restart of the tree application) don't pollute the timeline.
         """
+        self.pending_tree = None
         if self.web_app_loaded:
             web_view_page = self.ui.web_view_group_box.ui.web_engine_view.page()
             web_view_page.runJavaScript("reset_timeline()", self.on_timeline_reset)
@@ -119,9 +143,10 @@ class MainWindow(qt_widgets.QMainWindow):
         self.ui.blackboard_data_checkbox.setEnabled(True)
         self.ui.periodic_checkbox.setEnabled(True)
         if self.pre_loaded_tree:
-            javascript_command = "render_tree({{tree: {}}})".format(self.pre_loaded_tree)
-            web_view_page = self.ui.web_view_group_box.ui.web_engine_view.page()
-            web_view_page.runJavaScript(javascript_command, self.on_tree_rendered)
+            self.pending_tree = self.pre_loaded_tree
+            self.pre_loaded_tree = None
+            if not self.render_in_flight:
+                self.render_pending_tree()
 
     def closeEvent(self, event):
         console.logdebug("received close event [window]")
