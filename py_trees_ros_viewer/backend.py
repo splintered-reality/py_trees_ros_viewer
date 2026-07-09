@@ -253,6 +253,7 @@ class Backend(qt_core.QObject):
 
     discovered_namespaces_changed = qt_core.pyqtSignal(list, name="discoveredNamespacesChanged")
     tree_snapshot_arrived = qt_core.pyqtSignal(dict, name="treeSnapshotArrived")
+    connection_reset = qt_core.pyqtSignal(name="connectionReset")
 
     def __init__(self, parameters):
         super().__init__()
@@ -333,6 +334,7 @@ class Backend(qt_core.QObject):
             self.snapshot_stream.shutdown()
             self.snapshot_stream = None
         self.connected_namespace = namespace
+        self.cached_blackboard = {"behaviours": {}, "data": {}}
         console.logdebug("creating a new snapshot stream connection [{}][backend]".format(namespace))
         try:
             self.snapshot_stream = SnapshotStream(
@@ -341,6 +343,7 @@ class Backend(qt_core.QObject):
                 callback=self.tree_snapshot_handler,
                 parameters=self.parameters
             )
+            self.connection_reset.emit()
         except exceptions.TimedOutError as e:
             console.logwarn("failed to connect, will retry when services reappear [{}][{}][backend]".format(namespace, str(e)))
 

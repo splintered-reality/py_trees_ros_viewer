@@ -55,6 +55,24 @@ class MainWindow(qt_widgets.QMainWindow):
         """
         console.logdebug("response from js/render_tree ['{}'][window]".format(response))
 
+    @qt_core.pyqtSlot()
+    def on_connection_reset(self):
+        """
+        Clear the timeline cache so that snapshots from a previous connection
+        (e.g., pre-restart of the tree application) don't pollute the timeline.
+        """
+        if self.web_app_loaded:
+            web_view_page = self.ui.web_view_group_box.ui.web_engine_view.page()
+            web_view_page.runJavaScript("reset_timeline()", self.on_timeline_reset)
+        else:
+            self.pre_loaded_tree = None
+
+    def on_timeline_reset(self, response):
+        """
+        Callback triggered on a response being received from the js reset_timeline method.
+        """
+        console.logdebug("response from js/reset_timeline ['{}'][window]".format(response))
+
     @qt_core.pyqtSlot(list)
     def on_discovered_namespaces_changed(self, discovered_namespaces):
         console.logdebug("discovered namespaces changed callback {}[window]".format(discovered_namespaces))

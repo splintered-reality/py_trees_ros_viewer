@@ -60,6 +60,21 @@
       })
       return "rendered"
     }
+
+    reset_timeline = function() {
+      console.log("resetting the timeline cache")
+      cache = timeline_graph.get('cache')
+      _.each(cache.getEmbeddedCells(), function(embedded) {
+          cache.unembed(embedded)
+          embedded.remove()  // from the graph
+      })
+      cache.set('trees', [])
+      cache.set('events', [])
+      cache.set('selected_index', undefined)
+      cache.set('selected', undefined)
+      timeline_graph.set('streaming', true)
+      return "reset"
+    }
   </script>
 </body>
 </html>
