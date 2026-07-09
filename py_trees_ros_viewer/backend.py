@@ -277,16 +277,20 @@ class Backend(qt_core.QObject):
             old_parameters = copy.copy(self.parameters)
         while rclpy.ok() and not self.shutdown_requested:
             self.discover_namespaces()
+            # hold the lock only long enough to snapshot state shared with the
+            # qt thread - connecting can block for seconds at a time and the
+            # qt handlers block on this lock (a frozen gui ensues otherwise)
             with self.lock:
                 if self.parameters != old_parameters:
                     if self.snapshot_stream is not None:
                         self.snapshot_stream.reconfigure(self.parameters)
                 old_parameters = copy.copy(self.parameters)
-                if self.enqueued_connection_request_namespace is not None:
-                    self.connect(self.enqueued_connection_request_namespace)
-                    self.enqueued_connection_request_namespace = None
-                else:
-                    self.maintain_connection()
+                enqueued_namespace = self.enqueued_connection_request_namespace
+                self.enqueued_connection_request_namespace = None
+            if enqueued_namespace is not None:
+                self.connect(enqueued_namespace)
+            else:
+                self.maintain_connection()
             rclpy.spin_once(self.node, timeout_sec=0.1)
         if self.snapshot_stream is not None:
             self.snapshot_stream.shutdown()
@@ -336,12 +340,14 @@ class Backend(qt_core.QObject):
         self.connected_namespace = namespace
         self.cached_blackboard = {"behaviours": {}, "data": {}}
         console.logdebug("creating a new snapshot stream connection [{}][backend]".format(namespace))
+        with self.lock:
+            parameters = copy.copy(self.parameters)
         try:
             self.snapshot_stream = SnapshotStream(
                 node=self.node,
                 namespace=namespace,
                 callback=self.tree_snapshot_handler,
-                parameters=self.parameters
+                parameters=parameters
             )
             self.connection_reset.emit()
         except exceptions.TimedOutError as e:
@@ -366,9 +372,15 @@ class Backend(qt_core.QObject):
                 self.snapshot_stream.shutdown()
                 self.snapshot_stream = None
         if self.snapshot_stream is None:
-            open_service_name = self.connected_namespace + "/open"
-            service_names_and_types = self.node.get_service_names_and_types()
-            if any(name == open_service_name for name, unused_types in service_names_and_types):
+            # wait for the full set of services - connecting while the tree is
+            # only partially through its setup otherwise triggers an endless
+            # cycle of blocking, timing-out connection attempts
+            required_service_names = [
+                self.connected_namespace + "/" + suffix
+                for suffix in ("open", "close", "reconfigure")
+            ]
+            service_names = [name for name, unused_types in self.node.get_service_names_and_types()]
+            if all(name in service_names for name in required_service_names):
                 console.loginfo("snapshot stream services rediscovered, reconnecting [{}][backend]".format(self.connected_namespace))
                 self.connect(self.connected_namespace)
 
