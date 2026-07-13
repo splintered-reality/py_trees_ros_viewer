@@ -60,6 +60,8 @@ def msg_constant_to_behaviour_str(value: int) -> str:
         return 'Selector'
     elif value == py_trees_msgs.Behaviour.PARALLEL:
         return 'Parallel'
+    elif value == py_trees_msgs.Behaviour.COMPOSITE:
+        return 'Composite'
     elif value == py_trees_msgs.Behaviour.DECORATOR:
         return 'Decorator'
     elif value == py_trees_msgs.Behaviour.BEHAVIOUR:

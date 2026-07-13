@@ -335,7 +335,7 @@ class Backend(qt_core.QObject):
             'Sequence': '#FFA500',
             'Selector': '#00FFFF',
             'Parallel': '#FFFF00',
-            'Recovery': '#9070DD',
+            'Composite': '#9070DD',
             'Behaviour': '#555555',
             'Decorator': '#DDDDDD',
         }
