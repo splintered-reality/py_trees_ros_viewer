@@ -47,7 +47,7 @@ def msg_constant_to_behaviour_str(value: int) -> str:
         value: see the message definition for details
 
     Returns:
-        the bheaviour class type as a string (e.g. 'Sequence')
+        the behaviour class type as a string (e.g. 'Sequence')
 
     Raises:
         TypeError: if the message type is unrecognised
