@@ -172,6 +172,9 @@ def main():
         window.close()
 
     signal.signal(signal.SIGINT, on_shutdown)
+    # qt webengine (chromium) installs its own SIGTERM handler that neither
+    # terminates nor chains, leaving the application running - reclaim it
+    signal.signal(signal.SIGTERM, on_shutdown)
     timer = qt_core.QTimer()
     timer.timeout.connect(lambda: None)
     timer.start(250)
