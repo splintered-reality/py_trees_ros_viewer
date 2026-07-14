@@ -2,6 +2,19 @@
 Changelog
 =========
 
+0.3.0 (2026-07-13)
+------------------
+* [code] Handle SIGTERM using on_shutdown function (`#56 <https://github.com/splintered-reality/py_trees_ros_viewer/issues/56>`_)
+* [code] Add purple color for user-defined composites (`#48 <https://github.com/splintered-reality/py_trees_ros_viewer/issues/48>`_)
+* [code] Improve behavior around hanging with too much blackboard data or too many disconnects/reconnects (`#55 <https://github.com/splintered-reality/py_trees_ros_viewer/issues/55>`_)
+* [code] Clear snapshot timeline on reconnect (`#54 <https://github.com/splintered-reality/py_trees_ros_viewer/issues/54>`_)
+* [infra] Temporarily exclude python3-pyqt5 dep on Lyrical and Rolling (`#53 <https://github.com/splintered-reality/py_trees_ros_viewer/issues/53>`_)
+* [infra] Fix package.xml dependencies for newer Ubuntu distros (`#52 <https://github.com/splintered-reality/py_trees_ros_viewer/issues/52>`_)
+* Allow reconnecting to snapshot streams on backend restart (`#51 <https://github.com/splintered-reality/py_trees_ros_viewer/issues/51>`_)
+* Add resource file (`#50 <https://github.com/splintered-reality/py_trees_ros_viewer/issues/50>`_)
+* Fix small typo in README
+* Contributors: Jorge Santos Simón, Sebastian Castro
+
 0.2.5 (2025-01-13)
 ------------------
 * [readme] Small tweaks (`#41 <https://github.com/splintered-reality/py_trees_ros_viewer/issues/41>`_)
