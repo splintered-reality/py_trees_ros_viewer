@@ -83,7 +83,6 @@ setup(
     zip_safe=True,
     classifiers=[
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: BSD License',
         'Programming Language :: Python',
         'Topic :: Scientific/Engineering :: Artificial Intelligence',
         'Topic :: Software Development :: Libraries'
@@ -94,9 +93,7 @@ setup(
     long_description=(
         "A Qt-JS hybrid viewer for visualising executing or log-replayed behaviour trees"
     ),
-    license='BSD',
-    # test_suite="tests"
-    # tests_require=['nose', 'pytest', 'flake8', 'yanc', 'nose-htmloutput']
+    license='BSD-3-Clause',
     entry_points={
         'console_scripts': [
             'py-trees-tree-viewer = py_trees_ros_viewer.viewer:main',
