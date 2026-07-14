@@ -2,8 +2,8 @@
 Changelog
 =========
 
-Forthcoming
------------
+0.3.0 (2026-07-13)
+------------------
 * [code] Handle SIGTERM using on_shutdown function (`#56 <https://github.com/splintered-reality/py_trees_ros_viewer/issues/56>`_)
 * [code] Add purple color for user-defined composites (`#48 <https://github.com/splintered-reality/py_trees_ros_viewer/issues/48>`_)
 * [code] Improve behavior around hanging with too much blackboard data or too many disconnects/reconnects (`#55 <https://github.com/splintered-reality/py_trees_ros_viewer/issues/55>`_)
